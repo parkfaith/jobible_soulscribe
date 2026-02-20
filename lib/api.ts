@@ -4,9 +4,7 @@
  * 설정되지 않은 경우 로컬 개발 서버(localhost:8000)를 사용합니다.
  */
 
-const BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, '') ??
-  'http://localhost:8000';
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, '') ?? '';
 
 // ── 공통 fetch 래퍼 ────────────────────────────────────────────────
 
@@ -14,6 +12,9 @@ async function request<T>(
   path: string,
   options: RequestInit = {}
 ): Promise<T> {
+  if (!BASE_URL) {
+    throw new Error('API not configured');
+  }
   const res = await fetch(`${BASE_URL}${path}`, {
     headers: {
       'Content-Type': 'application/json',
