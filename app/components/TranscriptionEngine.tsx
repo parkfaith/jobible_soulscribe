@@ -6,16 +6,19 @@ interface TranscriptionEngineProps {
   originalText: string;
   onComplete: (accuracy: number, time: number) => void;
   isComplete: boolean;
+  fadeLevel?: 0 | 1 | 2 | 3;
 }
 
 export default function TranscriptionEngine({
   originalText,
   onComplete,
   isComplete,
+  fadeLevel = 0,
 }: TranscriptionEngineProps) {
   const [userInput, setUserInput] = useState('');
   const [accuracy, setAccuracy] = useState<number | null>(null);
   const startTimeRef = useRef<number | null>(null);
+  const [hintOpen, setHintOpen] = useState(false);
 
   useEffect(() => {
     if (isComplete) {
@@ -83,38 +86,106 @@ export default function TranscriptionEngine({
         <div style={{ flex: 1, height: '1px', background: 'linear-gradient(to left, transparent, rgba(201,168,76,0.25))' }} />
       </div>
 
-      {/* Character display */}
-      <div
-        className="rounded-sm"
-        style={{
-          background: 'rgba(0,0,0,0.3)',
-          border: '1px solid rgba(201,168,76,0.1)',
-          padding: '1.2rem 1.5rem',
-          fontFamily: "'Cormorant Garamond', serif",
-          fontSize: '1.15rem',
-          fontStyle: 'italic',
-          lineHeight: 1.8,
-          minHeight: '4rem',
-          letterSpacing: '0.02em',
-          wordBreak: 'break-word',
-          overflowWrap: 'break-word',
-          overflow: 'hidden',
-        }}
-      >
-        {originalText.split('').map((char, i) => {
-          let className = 'char pending';
-          if (i < userInput.length) {
-            className = userInput[i] === char ? 'char correct' : 'char wrong';
-          } else if (i === userInput.length) {
-            className = 'char current';
-          }
-          return (
-            <span key={i} className={className}>
-              {char === ' ' ? '\u00A0' : char}
+      {/* Character display — fadeLevel > 0이면 접었다 펼 수 있는 힌트 */}
+      {fadeLevel > 0 ? (
+        <div>
+          <button
+            onClick={() => setHintOpen((prev) => !prev)}
+            className="w-full flex items-center gap-2 cursor-pointer rounded-sm transition-all"
+            style={{
+              background: hintOpen ? 'rgba(0,0,0,0.3)' : 'rgba(0,0,0,0.15)',
+              border: '1px solid rgba(201,168,76,0.1)',
+              padding: '0.7rem 1.2rem',
+              color: 'var(--gold-dim)',
+              fontFamily: "'Crimson Pro', serif",
+              fontSize: '0.78rem',
+              letterSpacing: '0.1em',
+            }}
+          >
+            <span style={{
+              transform: hintOpen ? 'rotate(90deg)' : 'rotate(0deg)',
+              transition: 'transform 0.2s ease',
+              display: 'inline-block',
+            }}>
+              ▸
             </span>
-          );
-        })}
-      </div>
+            <span>{hintOpen ? 'Hide Hint' : 'Show Hint'}</span>
+          </button>
+          <div
+            style={{
+              maxHeight: hintOpen ? '300px' : '0',
+              overflow: 'hidden',
+              transition: 'max-height 0.3s ease',
+            }}
+          >
+            <div
+              className="rounded-sm"
+              style={{
+                background: 'rgba(0,0,0,0.3)',
+                borderLeft: '1px solid rgba(201,168,76,0.1)',
+                borderRight: '1px solid rgba(201,168,76,0.1)',
+                borderBottom: '1px solid rgba(201,168,76,0.1)',
+                padding: '1.2rem 1.5rem',
+                fontFamily: "'Cormorant Garamond', serif",
+                fontSize: '1.15rem',
+                fontStyle: 'italic',
+                lineHeight: 1.8,
+                minHeight: '4rem',
+                letterSpacing: '0.02em',
+                wordBreak: 'break-word',
+                overflowWrap: 'break-word',
+                overflow: 'hidden',
+              }}
+            >
+              {originalText.split('').map((char, i) => {
+                let className = 'char pending';
+                if (i < userInput.length) {
+                  className = userInput[i] === char ? 'char correct' : 'char wrong';
+                } else if (i === userInput.length) {
+                  className = 'char current';
+                }
+                return (
+                  <span key={i} className={className}>
+                    {char === ' ' ? '\u00A0' : char}
+                  </span>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div
+          className="rounded-sm"
+          style={{
+            background: 'rgba(0,0,0,0.3)',
+            border: '1px solid rgba(201,168,76,0.1)',
+            padding: '1.2rem 1.5rem',
+            fontFamily: "'Cormorant Garamond', serif",
+            fontSize: '1.15rem',
+            fontStyle: 'italic',
+            lineHeight: 1.8,
+            minHeight: '4rem',
+            letterSpacing: '0.02em',
+            wordBreak: 'break-word',
+            overflowWrap: 'break-word',
+            overflow: 'hidden',
+          }}
+        >
+          {originalText.split('').map((char, i) => {
+            let className = 'char pending';
+            if (i < userInput.length) {
+              className = userInput[i] === char ? 'char correct' : 'char wrong';
+            } else if (i === userInput.length) {
+              className = 'char current';
+            }
+            return (
+              <span key={i} className={className}>
+                {char === ' ' ? '\u00A0' : char}
+              </span>
+            );
+          })}
+        </div>
+      )}
 
       {/* Progress bar */}
       <div className="progress-line">

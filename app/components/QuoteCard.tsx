@@ -6,9 +6,17 @@ import { Quote } from '@/lib/quotes';
 interface QuoteCardProps {
   quote: Quote;
   hideText?: boolean; // Scramble/Cloze 모드에서 원문 블러 처리
+  fadeLevel?: 0 | 1 | 2 | 3; // Progressive Fading 단계
 }
 
-export default function QuoteCard({ quote, hideText = false }: QuoteCardProps) {
+const FADE_STYLES: Record<number, { filter: string; opacity: number }> = {
+  0: { filter: 'none', opacity: 1 },
+  1: { filter: 'blur(2px)', opacity: 1 },
+  2: { filter: 'blur(5px)', opacity: 1 },
+  3: { filter: 'blur(8px)', opacity: 0.3 },
+};
+
+export default function QuoteCard({ quote, hideText = false, fadeLevel = 0 }: QuoteCardProps) {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isRevealed, setIsRevealed] = useState(false);
 
@@ -78,9 +86,12 @@ export default function QuoteCard({ quote, hideText = false }: QuoteCardProps) {
             lineHeight: 1.75,
             color: 'var(--parchment)',
             letterSpacing: '0.01em',
-            filter: hideText && !isRevealed ? 'blur(7px)' : 'none',
-            userSelect: hideText && !isRevealed ? 'none' : 'auto',
-            transition: 'filter 0.3s ease',
+            filter: hideText && !isRevealed
+              ? 'blur(7px)'
+              : FADE_STYLES[fadeLevel].filter,
+            opacity: hideText && !isRevealed ? 1 : FADE_STYLES[fadeLevel].opacity,
+            userSelect: (hideText && !isRevealed) || fadeLevel >= 2 ? 'none' : 'auto',
+            transition: 'filter 0.3s ease, opacity 0.3s ease',
           }}
         >
           &ldquo;{quote.text}&rdquo;
@@ -237,6 +248,38 @@ export default function QuoteCard({ quote, hideText = false }: QuoteCardProps) {
       >
         {quote.translation}
       </p>
+
+      {/* Progressive Fading 인디케이터 */}
+      {fadeLevel > 0 && (
+        <div
+          className="flex items-center gap-2"
+          style={{
+            marginTop: '0.8rem',
+            fontSize: '0.72rem',
+            color: 'var(--gold-dim)',
+            letterSpacing: '0.08em',
+            fontFamily: "'Crimson Pro', serif",
+          }}
+        >
+          <span>Memory Fading</span>
+          <div className="flex gap-1">
+            {[1, 2, 3].map((level) => (
+              <div
+                key={level}
+                style={{
+                  width: '6px',
+                  height: '6px',
+                  borderRadius: '50%',
+                  background: level <= fadeLevel
+                    ? 'var(--gold-dim)'
+                    : 'rgba(201,168,76,0.15)',
+                  transition: 'background 0.3s ease',
+                }}
+              />
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

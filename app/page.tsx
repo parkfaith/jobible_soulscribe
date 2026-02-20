@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { getTodayQuote, getTodayQuoteIndex, Quote } from '@/lib/quotes';
 import { getStreak, markComplete, isCompletedToday } from '@/lib/streak';
+import { getTodayRepeatCount, incrementRepeatCount } from '@/lib/fading';
 import { postStudyLog, registerUser } from '@/lib/api';
 import QuoteCard from './components/QuoteCard';
 import TranscriptionEngine from './components/TranscriptionEngine';
@@ -31,12 +32,14 @@ export default function Home() {
   const [completeStats, setCompleteStats] = useState<CompleteStats | null>(null);
   const [resetKey, setResetKey] = useState(0);
   const [completedToday, setCompletedToday] = useState(false);
+  const [repeatCount, setRepeatCount] = useState(0);
 
   useEffect(() => {
     // 클라이언트 초기화
     const todayQuote = getTodayQuote();
     setQuote(todayQuote);
     setCompletedToday(isCompletedToday());
+    setRepeatCount(getTodayRepeatCount());
 
     const now = new Date();
     const formatted = now.toLocaleDateString('en-US', {
@@ -126,6 +129,8 @@ export default function Home() {
     setIsComplete(false);
     setCompleteStats(null);
     setResetKey((k) => k + 1);
+    const newCount = incrementRepeatCount();
+    setRepeatCount(newCount);
   };
 
   const switchMode = (newMode: Mode) => {
@@ -242,7 +247,11 @@ export default function Home() {
         style={{ padding: '3rem 1.5rem 4rem', gap: 0 }}
       >
         {/* 명언 카드 — Scramble/Cloze 모드에서는 원문 블러 처리 */}
-        <QuoteCard quote={quote} hideText={mode !== 'transcription' && !isComplete} />
+        <QuoteCard
+          quote={quote}
+          hideText={mode !== 'transcription' && !isComplete}
+          fadeLevel={isComplete ? 0 : Math.min(3, repeatCount) as 0 | 1 | 2 | 3}
+        />
 
         {/* 모드 탭 — 3가지 모드 */}
         <div
@@ -345,6 +354,7 @@ export default function Home() {
               originalText={quote.text}
               onComplete={handleTranscriptionComplete}
               isComplete={isComplete}
+              fadeLevel={Math.min(3, repeatCount) as 0 | 1 | 2 | 3}
             />
           ) : mode === 'scramble' ? (
             <ScrambleMode
@@ -365,18 +375,20 @@ export default function Home() {
       </main>
 
       {/* 푸터 */}
-      <footer
-        className="flex justify-between items-center"
-        style={{
-          padding: '1.5rem 2.5rem',
-          borderTop: '1px solid rgba(255,255,255,0.04)',
-          fontSize: '0.72rem',
-          color: 'rgba(154,144,128,0.5)',
-          letterSpacing: '0.08em',
-        }}
-      >
-        <span>joBiBle SoulScribe — v0.1</span>
-        <span>{streak > 0 ? `🔥 ${streak} day streak` : ''}</span>
+      <footer className="w-full flex justify-center">
+        <div
+          className="max-w-170 md:max-w-215 w-full flex justify-between items-center"
+          style={{
+            padding: '1.5rem 1.5rem',
+            borderTop: '1px solid rgba(255,255,255,0.04)',
+            fontSize: '0.72rem',
+            color: 'rgba(154,144,128,0.5)',
+            letterSpacing: '0.08em',
+          }}
+        >
+          <span>&copy; 2026 joBiBle SoulScribe</span>
+          <span>Made by JunHyoung Park</span>
+        </div>
       </footer>
     </div>
   );
