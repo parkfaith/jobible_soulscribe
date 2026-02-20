@@ -71,12 +71,12 @@ export function AuthButton() {
             transition: 'all 0.2s ease',
           }}
           onMouseEnter={e => {
-            (e.target as HTMLButtonElement).style.color = 'var(--gold-dim)';
-            (e.target as HTMLButtonElement).style.borderColor = 'rgba(201,168,76,0.4)';
+            e.currentTarget.style.color = 'var(--gold-dim)';
+            e.currentTarget.style.borderColor = 'rgba(201,168,76,0.4)';
           }}
           onMouseLeave={e => {
-            (e.target as HTMLButtonElement).style.color = 'var(--ink-dim)';
-            (e.target as HTMLButtonElement).style.borderColor = 'rgba(201,168,76,0.2)';
+            e.currentTarget.style.color = 'var(--ink-dim)';
+            e.currentTarget.style.borderColor = 'rgba(201,168,76,0.2)';
           }}
         >
           로그아웃

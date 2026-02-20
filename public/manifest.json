@@ -1,0 +1,21 @@
+{
+  "name": "joBiBle SoulScribe",
+  "short_name": "SoulScribe",
+  "description": "매일 명언 필사로 마음을 가꾸는 리추얼 영어 학습 플랫폼",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1a1916",
+  "theme_color": "#c9a84c",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

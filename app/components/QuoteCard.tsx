@@ -1,7 +1,9 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { Quote } from '@/lib/quotes';
+import ShareableCard from './ShareableCard';
+import { generateQuoteImage, shareQuoteImage } from '@/lib/share';
 
 interface QuoteCardProps {
   quote: Quote;
@@ -19,11 +21,35 @@ const FADE_STYLES: Record<number, { filter: string; opacity: number }> = {
 export default function QuoteCard({ quote, hideText = false, fadeLevel = 0 }: QuoteCardProps) {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isRevealed, setIsRevealed] = useState(false);
+  const [isSharing, setIsSharing] = useState(false);
+  const shareableCardRef = useRef<HTMLDivElement>(null);
 
   // 모드 변경 시 원문 가리기 상태 초기화
   useEffect(() => {
     if (hideText) setIsRevealed(false);
   }, [hideText]);
+
+  // 언마운트 시 Speech Synthesis 정리 (메모리 누수 방지)
+  useEffect(() => {
+    return () => {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
+    };
+  }, []);
+
+  const handleShare = useCallback(async () => {
+    if (!shareableCardRef.current || isSharing) return;
+    setIsSharing(true);
+    try {
+      const blob = await generateQuoteImage(shareableCardRef.current);
+      await shareQuoteImage(blob, quote.source);
+    } catch (error) {
+      console.error('Failed to share quote:', error);
+    } finally {
+      setIsSharing(false);
+    }
+  }, [quote.source]);
 
   const handleSpeak = useCallback(() => {
     if (!('speechSynthesis' in window)) return;
@@ -139,31 +165,72 @@ export default function QuoteCard({ quote, hideText = false, fadeLevel = 0 }: Qu
         )}
       </div>
 
-      {/* 발음 듣기 버튼 */}
-      <button
-        onClick={handleSpeak}
-        title={isSpeaking ? '정지' : '원문 발음 듣기'}
+      {/* 우측 상단 버튼 그룹 */}
+      <div
         style={{
           position: 'absolute',
           top: '1.4rem',
           right: '1.6rem',
-          background: 'none',
-          border: '1px solid rgba(201,168,76,0.2)',
-          borderRadius: '50%',
-          width: '2rem',
-          height: '2rem',
           display: 'flex',
+          gap: '0.5rem',
           alignItems: 'center',
-          justifyContent: 'center',
-          cursor: 'pointer',
-          color: isSpeaking ? 'var(--gold)' : 'var(--gold-dim)',
-          fontSize: '0.9rem',
-          transition: 'all 0.2s ease',
-          boxShadow: isSpeaking ? '0 0 8px rgba(201,168,76,0.3)' : 'none',
         }}
       >
-        {isSpeaking ? '⏹' : '🔊'}
-      </button>
+        {/* 공유 버튼 */}
+        <button
+          onClick={handleShare}
+          disabled={isSharing}
+          title="이미지로 공유"
+          style={{
+            background: 'none',
+            border: '1px solid rgba(201,168,76,0.2)',
+            borderRadius: '50%',
+            width: '2rem',
+            height: '2rem',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: isSharing ? 'wait' : 'pointer',
+            color: isSharing ? 'var(--gold)' : 'var(--gold-dim)',
+            fontSize: '0.85rem',
+            transition: 'all 0.2s ease',
+            opacity: isSharing ? 0.6 : 1,
+          }}
+        >
+          {isSharing ? (
+            <span style={{ fontSize: '0.7rem' }}>···</span>
+          ) : (
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8" />
+              <polyline points="16 6 12 2 8 6" />
+              <line x1="12" y1="2" x2="12" y2="15" />
+            </svg>
+          )}
+        </button>
+        {/* 발음 듣기 버튼 */}
+        <button
+          onClick={handleSpeak}
+          title={isSpeaking ? '정지' : '원문 발음 듣기'}
+          style={{
+            background: 'none',
+            border: '1px solid rgba(201,168,76,0.2)',
+            borderRadius: '50%',
+            width: '2rem',
+            height: '2rem',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            color: isSpeaking ? 'var(--gold)' : 'var(--gold-dim)',
+            fontSize: '0.9rem',
+            transition: 'all 0.2s ease',
+            boxShadow: isSpeaking ? '0 0 8px rgba(201,168,76,0.3)' : 'none',
+          }}
+        >
+          {isSpeaking ? '⏹' : '🔊'}
+        </button>
+      </div>
 
       {/* Divider */}
       <div
@@ -280,6 +347,19 @@ export default function QuoteCard({ quote, hideText = false, fadeLevel = 0 }: Qu
           </div>
         </div>
       )}
+
+      {/* 숨겨진 공유용 카드 (html-to-image 캡처 대상) */}
+      <div
+        style={{
+          position: 'fixed',
+          left: '-9999px',
+          top: '-9999px',
+          pointerEvents: 'none',
+        }}
+        aria-hidden="true"
+      >
+        <ShareableCard ref={shareableCardRef} quote={quote} />
+      </div>
     </div>
   );
 }

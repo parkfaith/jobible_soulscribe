@@ -260,30 +260,20 @@ export const QUOTES: Quote[] = [
   }
 ];
 
-// 오늘의 명언 반환 (연중 일수 기반으로 매일 다른 명언 제공)
-export function getTodayQuote(): Quote {
+// 연중 일수 계산 (getTodayQuote, getTodayQuoteIndex 공통)
+function getDayOfYear(): number {
   const now = new Date();
   const startOfYear = new Date(now.getFullYear(), 0, 0);
   const diff = now.getTime() - startOfYear.getTime();
-  const dayOfYear = Math.floor(diff / (1000 * 60 * 60 * 24));
-  return QUOTES[dayOfYear % QUOTES.length];
+  return Math.floor(diff / (1000 * 60 * 60 * 24));
+}
+
+// 오늘의 명언 반환 (연중 일수 기반으로 매일 다른 명언 제공)
+export function getTodayQuote(): Quote {
+  return QUOTES[getDayOfYear() % QUOTES.length];
 }
 
 // AI 피드백 캐싱용 오늘의 명언 인덱스 (1-based, sentence_id로 사용)
 export function getTodayQuoteIndex(): number {
-  const now = new Date();
-  const startOfYear = new Date(now.getFullYear(), 0, 0);
-  const diff = now.getTime() - startOfYear.getTime();
-  const dayOfYear = Math.floor(diff / (1000 * 60 * 60 * 24));
-  return (dayOfYear % QUOTES.length) + 1;
-}
-
-// 카테고리별 명언 필터링
-export function getQuotesByCategory(category: QuoteCategory): Quote[] {
-  return QUOTES.filter(q => q.category === category);
-}
-
-// 난이도별 명언 필터링
-export function getQuotesByDifficulty(difficulty: QuoteDifficulty): Quote[] {
-  return QUOTES.filter(q => q.difficulty === difficulty);
+  return (getDayOfYear() % QUOTES.length) + 1;
 }

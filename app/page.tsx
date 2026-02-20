@@ -72,7 +72,7 @@ export default function Home() {
 
   // 첫 로그인 시 백엔드 users 테이블에 자동 등록
   useEffect(() => {
-    if (session?.user) {
+    if (session?.user?.id) {
       registerUser({
         google_id: session.user.id,
         email: session.user.email ?? '',
