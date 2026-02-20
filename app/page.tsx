@@ -134,9 +134,14 @@ export default function Home() {
   };
 
   const switchMode = (newMode: Mode) => {
-    if (!isComplete) {
-      setMode(newMode);
+    if (newMode === mode) return;
+    // 완료 상태에서 모드 전환 시 자동 리셋
+    if (isComplete) {
+      setIsComplete(false);
+      setCompleteStats(null);
+      setResetKey((k) => k + 1);
     }
+    setMode(newMode);
   };
 
   if (!quote) {
