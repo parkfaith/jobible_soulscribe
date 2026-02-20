@@ -1,6 +1,6 @@
 {
   "name": "joBiBle SoulScribe",
-  "short_name": "SoulScribe",
+  "short_name": "joBiBle SoulScribe",
   "description": "매일 명언 필사로 마음을 가꾸는 리추얼 영어 학습 플랫폼",
   "start_url": "/",
   "display": "standalone",
