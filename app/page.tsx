@@ -12,6 +12,7 @@ import ScrambleMode from './components/ScrambleMode';
 import ClozeMode from './components/ClozeMode';
 import CompleteOverlay from './components/CompleteOverlay';
 import { AuthButton } from './components/AuthButton';
+import InstallPrompt from './components/InstallPrompt';
 
 type Mode = 'transcription' | 'scramble' | 'cloze';
 
@@ -246,6 +247,11 @@ export default function Home() {
         <span className="ml-auto italic">
           &ldquo;A sentence a day keeps the silence away.&rdquo;
         </span>
+      </div>
+
+      {/* PWA 설치 안내 */}
+      <div className="flex justify-center" style={{ padding: '0.8rem 1.5rem 0' }}>
+        <InstallPrompt />
       </div>
 
       {/* 메인 콘텐츠 */}
