@@ -1,0 +1,9 @@
+# joBiBle SoulScribe — 백엔드 공통 의존성 (로컬 + Render 공용)
+# Python 3.11+ 권장 (3.14에서도 동작 확인됨)
+fastapi>=0.115.6
+uvicorn[standard]>=0.32.1
+python-dotenv>=1.0.1
+pydantic>=2.10.3
+pydantic-settings>=2.7.0
+httpx>=0.28.1
+openai>=1.58.0

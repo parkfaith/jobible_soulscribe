@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: jobible-soulscribe-api
+    runtime: python
+    region: singapore          # 한국과 가장 가까운 Render 리전
+    plan: free
+    buildCommand: pip install -r requirements-prod.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: TURSO_DATABASE_URL
+        sync: false            # Render 대시보드에서 직접 설정
+      - key: TURSO_AUTH_TOKEN
+        sync: false
+      - key: ALLOWED_ORIGINS
+        sync: false
+      - key: DEBUG
+        value: "false"

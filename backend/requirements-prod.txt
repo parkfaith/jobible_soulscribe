@@ -1,0 +1,4 @@
+# joBiBle SoulScribe — 프로덕션 전용 의존성 (Render 배포 시 사용)
+# Turso(libsql) 연결을 위한 패키지 — 빌드 시 Rust 컴파일러 필요
+-r requirements.txt
+libsql-experimental==0.0.55

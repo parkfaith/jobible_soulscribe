@@ -39,3 +39,13 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# python (백엔드)
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+backend/.venv/
+backend/venv/
+backend/soulscribe_local.db
