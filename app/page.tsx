@@ -28,6 +28,7 @@ export default function Home() {
   const [dateStr, setDateStr] = useState('');
   const [streak, setStreak] = useState(0);
   const [mode, setMode] = useState<Mode>('transcription');
+  const [userChoseMode, setUserChoseMode] = useState(false); // 사용자가 수동으로 모드 선택했는지
   const [isComplete, setIsComplete] = useState(false);
   const [completeStats, setCompleteStats] = useState<CompleteStats | null>(null);
   const [resetKey, setResetKey] = useState(0);
@@ -56,12 +57,12 @@ export default function Home() {
     const isMobile = window.innerWidth < 768;
     setMode(isMobile ? 'scramble' : 'transcription');
 
+    // resize 시 사용자가 수동 선택하지 않은 경우에만 모드 자동 전환
     const handleResize = () => {
-      const isMobile = window.innerWidth < 768;
-      setMode(prev => {
-        // 데스크탑으로 전환 시 필사 모드로, 모바일로 전환 시 스크램블 모드로
-        if (!isMobile && prev !== 'transcription') return 'transcription';
-        if (isMobile && prev === 'transcription') return 'scramble';
+      setUserChoseMode(prev => {
+        if (prev) return prev; // 사용자가 선택했으면 자동 전환 안 함
+        const mobile = window.innerWidth < 768;
+        setMode(mobile ? 'scramble' : 'transcription');
         return prev;
       });
     };
@@ -142,6 +143,7 @@ export default function Home() {
       setResetKey((k) => k + 1);
     }
     setMode(newMode);
+    setUserChoseMode(true); // 사용자 수동 선택 — resize로 자동 전환하지 않음
   };
 
   if (!quote) {
