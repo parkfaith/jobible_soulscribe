@@ -64,11 +64,11 @@ app.add_middleware(
 # ── 헬스체크 ─────────────────────────────────────────────────────
 # UptimeRobot이 5분마다 호출하는 가벼운 핑 엔드포인트.
 # DB나 AI를 거치지 않아 로그를 최소화합니다.
-@app.get("/health", include_in_schema=False)
+@app.api_route("/health", methods=["GET", "HEAD"], include_in_schema=False)
 async def health_check(request: Request):
-    # UptimeRobot 로그 오염 방지: User-Agent에 "UptimeRobot"이 있으면 로그 기록 안 함
+    # Keep-alive 모니터링 로그 오염 방지
     ua = request.headers.get("user-agent", "")
-    if "UptimeRobot" not in ua:
+    if not any(bot in ua for bot in ("UptimeRobot", "cron-job.org", "curl")):
         logger.info("Health check 요청")
     return Response(content='{"status":"alive"}', media_type="application/json")
 
