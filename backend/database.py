@@ -14,7 +14,7 @@ from config import settings
 
 # Turso 클라이언트 임포트 시도 (프로덕션 환경에서만 설치됨)
 try:
-    import libsql_experimental as libsql  # type: ignore
+    import libsql  # type: ignore
     _LIBSQL_AVAILABLE = True
 except ImportError:
     _LIBSQL_AVAILABLE = False
@@ -48,7 +48,7 @@ class _LocalConn:
 def get_db():
     """요청마다 DB 연결을 반환합니다 (FastAPI 의존성 주입용)."""
     if _use_turso():
-        import libsql_experimental as libsql  # type: ignore
+        import libsql  # type: ignore
         conn = libsql.connect(
             database=settings.turso_database_url,
             auth_token=settings.turso_auth_token,
