@@ -47,73 +47,76 @@ async def get_feedback(payload: FeedbackRequest):
     AI 피드백 반환. 캐시 히트 시 즉시 반환, 미스 시 GPT 호출 후 저장.
     """
     db = get_db()
+    try:
+        # ── 1. 캐시 확인 ──────────────────────────────────────────────
+        cached = db.execute(
+            "SELECT grammar_analysis, nuance_insights, practice_challenge "
+            "FROM ai_feedbacks WHERE sentence_id = ?",
+            [payload.sentence_id],
+        ).fetchone()
 
-    # ── 1. 캐시 확인 ──────────────────────────────────────────────
-    cached = db.execute(
-        "SELECT grammar_analysis, nuance_insights, practice_challenge "
-        "FROM ai_feedbacks WHERE sentence_id = ?",
-        [payload.sentence_id],
-    ).fetchone()
+        if cached:
+            logger.info(f"AI 피드백 캐시 히트: sentence_id={payload.sentence_id}")
+            return FeedbackResponse(
+                sentence_id=payload.sentence_id,
+                grammar_analysis=cached[0],
+                nuance_insights=cached[1],
+                practice_challenge=cached[2],
+                cached=True,
+            )
 
-    if cached:
-        logger.info(f"AI 피드백 캐시 히트: sentence_id={payload.sentence_id}")
+        # ── 2. OpenAI API 호출 ────────────────────────────────────────
+        if not settings.openai_api_key:
+            logger.warning("OPENAI_API_KEY 미설정 — 목업 피드백 반환")
+            return _mock_feedback(payload.sentence_id, payload.text)
+
+        try:
+            from openai import OpenAI
+            client = OpenAI(api_key=settings.openai_api_key)
+
+            response = client.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=[
+                    {"role": "system", "content": SYSTEM_PROMPT},
+                    {"role": "user", "content": f'다음 문장을 분석해주세요: "{payload.text}"'},
+                ],
+                temperature=0.7,
+                max_tokens=800,
+                response_format={"type": "json_object"},
+            )
+
+            raw = response.choices[0].message.content or "{}"
+            data = json.loads(raw)
+
+            grammar = data.get("grammar_analysis", "분석을 가져오지 못했습니다.")
+            nuance = data.get("nuance_insights", "분석을 가져오지 못했습니다.")
+            challenge = data.get("practice_challenge", "연습 문장을 가져오지 못했습니다.")
+
+        except Exception as e:
+            logger.error(f"OpenAI API 호출 실패: {e}")
+            raise HTTPException(status_code=503, detail="AI 피드백 서비스에 일시적인 오류가 발생했습니다.")
+
+        # ── 3. 캐시 저장 ──────────────────────────────────────────────
+        try:
+            db.execute(
+                "INSERT INTO ai_feedbacks (sentence_id, grammar_analysis, nuance_insights, practice_challenge) "
+                "VALUES (?, ?, ?, ?)",
+                [payload.sentence_id, grammar, nuance, challenge],
+            )
+            db.commit()
+            logger.info(f"AI 피드백 캐시 저장: sentence_id={payload.sentence_id}")
+        except Exception as e:
+            logger.warning(f"피드백 캐시 저장 실패 (무시됨): {e}")
+
         return FeedbackResponse(
             sentence_id=payload.sentence_id,
-            grammar_analysis=cached[0],
-            nuance_insights=cached[1],
-            practice_challenge=cached[2],
-            cached=True,
+            grammar_analysis=grammar,
+            nuance_insights=nuance,
+            practice_challenge=challenge,
+            cached=False,
         )
-
-    # ── 2. OpenAI API 호출 ────────────────────────────────────────
-    if not settings.openai_api_key:
-        logger.warning("OPENAI_API_KEY 미설정 — 목업 피드백 반환")
-        return _mock_feedback(payload.sentence_id, payload.text)
-
-    try:
-        from openai import OpenAI
-        client = OpenAI(api_key=settings.openai_api_key)
-
-        response = client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[
-                {"role": "system", "content": SYSTEM_PROMPT},
-                {"role": "user", "content": f'다음 문장을 분석해주세요: "{payload.text}"'},
-            ],
-            temperature=0.7,
-            max_tokens=800,
-            response_format={"type": "json_object"},
-        )
-
-        raw = response.choices[0].message.content or "{}"
-        data = json.loads(raw)
-
-        grammar = data.get("grammar_analysis", "분석을 가져오지 못했습니다.")
-        nuance = data.get("nuance_insights", "분석을 가져오지 못했습니다.")
-        challenge = data.get("practice_challenge", "연습 문장을 가져오지 못했습니다.")
-
-    except Exception as e:
-        logger.error(f"OpenAI API 호출 실패: {e}")
-        raise HTTPException(status_code=503, detail="AI 피드백 서비스에 일시적인 오류가 발생했습니다.")
-
-    # ── 3. 캐시 저장 ──────────────────────────────────────────────
-    try:
-        db.execute(
-            "INSERT INTO ai_feedbacks (sentence_id, grammar_analysis, nuance_insights, practice_challenge) "
-            "VALUES (?, ?, ?, ?)",
-            [payload.sentence_id, grammar, nuance, challenge],
-        )
-        logger.info(f"AI 피드백 캐시 저장: sentence_id={payload.sentence_id}")
-    except Exception as e:
-        logger.warning(f"피드백 캐시 저장 실패 (무시됨): {e}")
-
-    return FeedbackResponse(
-        sentence_id=payload.sentence_id,
-        grammar_analysis=grammar,
-        nuance_insights=nuance,
-        practice_challenge=challenge,
-        cached=False,
-    )
+    finally:
+        db.close()
 
 
 def _mock_feedback(sentence_id: int, text: str) -> FeedbackResponse:

@@ -57,11 +57,11 @@ def get_today_sentence():
                 difficulty="short",
             )
 
-        # 연중 일수 기반으로 오늘의 문장 인덱스 결정
-        day_idx = (_get_day_of_year() % total) + 1
+        # 연중 일수 기반으로 오늘의 문장 인덱스 결정 (OFFSET으로 ID 갭 안전)
+        day_idx = _get_day_of_year() % total
         row = conn.execute(
             "SELECT id, text, source, context, translation, category, difficulty "
-            "FROM daily_sentences WHERE id = ?",
+            "FROM daily_sentences ORDER BY id LIMIT 1 OFFSET ?",
             (day_idx,),
         ).fetchone()
 
