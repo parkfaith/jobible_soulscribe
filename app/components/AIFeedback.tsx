@@ -6,6 +6,7 @@ import { fetchFeedback, FeedbackResponse } from '@/lib/api';
 interface AIFeedbackProps {
   sentenceId: number;
   quoteText: string;
+  autoFetch?: boolean; // 완료 시 자동으로 피드백 요청
 }
 
 type FeedbackTab = 'grammar' | 'nuance' | 'challenge';
@@ -31,18 +32,21 @@ function loadFeedback(id: number): FeedbackResponse | null {
   } catch { return null; }
 }
 
-export function AIFeedback({ sentenceId, quoteText }: AIFeedbackProps) {
+export function AIFeedback({ sentenceId, quoteText, autoFetch = false }: AIFeedbackProps) {
   const [state, setState] = useState<'idle' | 'loading' | 'done' | 'error'>('idle');
   const [feedback, setFeedback] = useState<FeedbackResponse | null>(null);
   const [activeTab, setActiveTab] = useState<FeedbackTab>('grammar');
 
-  // 마운트 시 sessionStorage에서 이전 피드백 복원
+  // 마운트 시 sessionStorage에서 이전 피드백 복원 또는 자동 요청
   useEffect(() => {
     const cached = loadFeedback(sentenceId);
     if (cached) {
       setFeedback(cached);
       setState('done');
+    } else if (autoFetch && state === 'idle') {
+      handleFetch();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sentenceId]);
 
   const handleFetch = async () => {

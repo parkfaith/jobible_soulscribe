@@ -367,7 +367,7 @@ export default function Home() {
               letterSpacing: '0.12em',
             }}
           >
-            ▢ Cloze
+            <span style={{ display: 'inline-block', width: '0.6em', height: '0.6em', border: '1.5px solid currentColor', borderRadius: '1px', marginRight: '0.3em', verticalAlign: 'middle', position: 'relative', top: '-0.05em' }} /> Cloze
           </button>
         </div>
 

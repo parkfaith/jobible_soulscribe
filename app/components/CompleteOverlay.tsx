@@ -204,7 +204,7 @@ export default function CompleteOverlay({
         className="w-full"
         style={{ borderTop: '1px solid rgba(201,168,76,0.1)', paddingTop: '0.5rem' }}
       >
-        <AIFeedback sentenceId={sentenceId} quoteText={quoteText} />
+        <AIFeedback sentenceId={sentenceId} quoteText={quoteText} autoFetch />
       </div>
     </div>
   );
