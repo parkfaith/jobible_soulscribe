@@ -111,101 +111,107 @@ const ShareableCard = forwardRef<HTMLDivElement, ShareableCardProps>(
           {'\u201c'}
         </div>
 
-        {/* 명언 영문 */}
-        <p
+        {/* 명언 영문 + 구분선 + 저자 · 출처 + 한글 번역 + 브랜딩 */}
+        <div
           style={{
-            fontSize: '40px',
-            fontWeight: 300,
-            fontStyle: 'italic',
-            color: '#f5eed8',
-            lineHeight: 1.6,
             textAlign: 'center',
-            letterSpacing: '0.01em',
             maxWidth: '840px',
-            margin: 0,
           }}
         >
-          {quote.text}
-        </p>
+          {/* 영문 */}
+          <span
+            style={{
+              fontSize: '40px',
+              fontWeight: 300,
+              fontStyle: 'italic',
+              color: '#f5eed8',
+              lineHeight: 1.6,
+              letterSpacing: '0.01em',
+            }}
+          >
+            {quote.text}
+          </span>
 
-        {/* 한글 번역 */}
-        <p
-          style={{
-            fontSize: '22px',
-            fontWeight: 400,
-            color: 'rgba(154,144,128,0.7)',
-            lineHeight: 1.7,
-            textAlign: 'center',
-            maxWidth: '800px',
-            margin: '24px 0 0 0',
-            wordBreak: 'keep-all',
-            overflowWrap: 'break-word',
-          }}
-        >
-          {quote.translation}
-        </p>
+          <br /><br /><br />
 
-        {/* 골드 그라데이션 구분선 */}
-        <div
-          style={{
-            width: '80px',
-            height: '1px',
-            margin: '36px 0',
-            background: 'linear-gradient(to right, transparent, #8a6f32, transparent)',
-          }}
-        />
+          {/* 구분선 (인라인 블록으로 텍스트 플로우 안에서 렌더링) */}
+          <span
+            style={{
+              display: 'inline-block',
+              width: '80px',
+              height: '1px',
+              background: 'linear-gradient(to right, transparent, #8a6f32, transparent)',
+            }}
+          />
 
-        {/* 저자 + 출처 */}
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: '10px',
-          }}
-        >
-          <p
+          <br /><br /><br />
+
+          {/* 저자 · 출처 (한 줄) */}
+          <span
             style={{
               fontFamily: "'Crimson Pro', serif",
-              fontSize: '18px',
+              fontSize: '16px',
               textTransform: 'uppercase',
               letterSpacing: '0.12em',
               color: '#9a9080',
-              margin: 0,
-              textAlign: 'center',
               whiteSpace: 'nowrap',
             }}
           >
             — {quote.source}
-          </p>
-          <p
+          </span>
+          <span
+            style={{
+              fontFamily: "'Crimson Pro', serif",
+              fontSize: '16px',
+              color: '#9a9080',
+            }}
+          >
+            &nbsp;&nbsp;·&nbsp;&nbsp;
+          </span>
+          <span
             style={{
               fontFamily: "'Crimson Pro', serif",
               fontSize: '15px',
               fontStyle: 'italic',
               color: '#8a6f32',
-              margin: 0,
-              textAlign: 'center',
-              maxWidth: '800px',
-              wordBreak: 'keep-all',
+              letterSpacing: '0.04em',
+              whiteSpace: 'nowrap',
             }}
           >
             {quote.context}
-          </p>
-        </div>
+          </span>
 
-        {/* 브랜딩 */}
-        <div
-          style={{
-            marginTop: '44px',
-            fontFamily: "'IM Fell English', serif",
-            fontSize: '14px',
-            letterSpacing: '0.15em',
-            color: 'rgba(201,168,76,0.25)',
-            textTransform: 'uppercase',
-          }}
-        >
-          joBiBle SoulScribe
+          <br /><br />
+
+          {/* 한글 번역 */}
+          <span
+            style={{
+              fontSize: '16px',
+              fontWeight: 400,
+              fontStyle: 'italic',
+              color: 'rgba(154,144,128,0.55)',
+              lineHeight: 1.7,
+              wordBreak: 'keep-all',
+              overflowWrap: 'break-word',
+            }}
+          >
+            {quote.translation}
+          </span>
+
+          <br /><br /><br />
+
+          {/* 브랜딩 */}
+          <span
+            style={{
+              fontFamily: "'IM Fell English', serif",
+              fontSize: '14px',
+              letterSpacing: '0.15em',
+              color: 'rgba(201,168,76,0.25)',
+              textTransform: 'uppercase',
+            }}
+          >
+            joBiBle SoulScribe
+          </span>
         </div>
       </div>
     );

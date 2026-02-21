@@ -6,6 +6,20 @@ joBiBle SoulScribe 변경 이력
 
 ---
 
+## [2026-02-21] - 공유 이미지 카드 레이아웃 개선
+
+### 수정 (Fixed)
+- `ShareableCard.tsx` — html-to-image가 margin/padding/gap을 무시하는 문제 해결
+  - 모든 요소를 단일 텍스트 플로우(`<span>` + `<br/>`)로 통합
+  - 저자 · 출처를 한 줄로 표시 (`— ALBERT EINSTEIN · Physicist & Philosopher`)
+  - 한글 번역을 저자/출처 아래로 이동, 16px 이탤릭으로 축소
+  - 출처(context) 두 줄 깨짐 → `whiteSpace: 'nowrap'`으로 한 줄 유지
+
+### 수정 파일 목록
+- `app/components/ShareableCard.tsx`
+
+---
+
 ## [2026-02-21] - 코드 점검 및 정리
 
 ### 삭제 (Removed)
