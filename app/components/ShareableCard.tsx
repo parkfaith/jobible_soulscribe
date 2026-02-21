@@ -20,8 +20,9 @@ const ShareableCard = forwardRef<HTMLDivElement, ShareableCardProps>(
           alignItems: 'center',
           justifyContent: 'center',
           position: 'relative',
-          padding: '80px 80px 90px',
+          padding: '100px 100px 110px',
           fontFamily: "'Cormorant Garamond', serif",
+          boxSizing: 'border-box',
         }}
       >
         {/* 외곽 프레임 */}
@@ -91,7 +92,7 @@ const ShareableCard = forwardRef<HTMLDivElement, ShareableCardProps>(
             letterSpacing: '0.2em',
             textTransform: 'uppercase',
             color: '#8a6f32',
-            marginBottom: '40px',
+            marginBottom: '36px',
           }}
         >
           ✦&nbsp;&nbsp;{quote.category}&nbsp;&nbsp;✦
@@ -100,31 +101,46 @@ const ShareableCard = forwardRef<HTMLDivElement, ShareableCardProps>(
         {/* 장식용 큰따옴표 */}
         <div
           style={{
-            fontSize: '120px',
+            fontSize: '100px',
             lineHeight: 0.6,
             color: 'rgba(201,168,76,0.15)',
             fontWeight: 300,
-            marginBottom: '20px',
+            marginBottom: '16px',
           }}
         >
           {'\u201c'}
         </div>
 
-        {/* 명언 텍스트 */}
+        {/* 명언 영문 */}
         <p
           style={{
-            fontSize: '42px',
+            fontSize: '40px',
             fontWeight: 300,
             fontStyle: 'italic',
             color: '#f5eed8',
             lineHeight: 1.6,
             textAlign: 'center',
             letterSpacing: '0.01em',
-            maxWidth: '860px',
+            maxWidth: '840px',
             margin: 0,
           }}
         >
           {quote.text}
+        </p>
+
+        {/* 한글 번역 */}
+        <p
+          style={{
+            fontSize: '22px',
+            fontWeight: 400,
+            color: 'rgba(154,144,128,0.7)',
+            lineHeight: 1.7,
+            textAlign: 'center',
+            maxWidth: '800px',
+            margin: '24px 0 0 0',
+          }}
+        >
+          {quote.translation}
         </p>
 
         {/* 골드 그라데이션 구분선 */}
@@ -132,7 +148,7 @@ const ShareableCard = forwardRef<HTMLDivElement, ShareableCardProps>(
           style={{
             width: '80px',
             height: '1px',
-            margin: '40px 0',
+            margin: '36px 0',
             background: 'linear-gradient(to right, transparent, #8a6f32, transparent)',
           }}
         />
@@ -155,10 +171,10 @@ const ShareableCard = forwardRef<HTMLDivElement, ShareableCardProps>(
         <p
           style={{
             fontFamily: "'Crimson Pro', serif",
-            fontSize: '16px',
+            fontSize: '15px',
             fontStyle: 'italic',
             color: '#8a6f32',
-            marginTop: '8px',
+            margin: '6px 0 0 0',
           }}
         >
           {quote.context}
@@ -167,7 +183,7 @@ const ShareableCard = forwardRef<HTMLDivElement, ShareableCardProps>(
         {/* 브랜딩 */}
         <div
           style={{
-            marginTop: '50px',
+            marginTop: '44px',
             fontFamily: "'IM Fell English', serif",
             fontSize: '14px',
             letterSpacing: '0.15em',

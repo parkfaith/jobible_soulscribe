@@ -37,19 +37,7 @@ export function AIFeedback({ sentenceId, quoteText, autoFetch = false }: AIFeedb
   const [feedback, setFeedback] = useState<FeedbackResponse | null>(null);
   const [activeTab, setActiveTab] = useState<FeedbackTab>('grammar');
 
-  // 마운트 시 sessionStorage에서 이전 피드백 복원 또는 자동 요청
-  useEffect(() => {
-    const cached = loadFeedback(sentenceId);
-    if (cached) {
-      setFeedback(cached);
-      setState('done');
-    } else if (autoFetch && state === 'idle') {
-      handleFetch();
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sentenceId]);
-
-  const handleFetch = async () => {
+  const doFetch = async () => {
     setState('loading');
     try {
       const data = await fetchFeedback({ sentence_id: sentenceId, text: quoteText });
@@ -61,12 +49,24 @@ export function AIFeedback({ sentenceId, quoteText, autoFetch = false }: AIFeedb
     }
   };
 
+  // 마운트 시 sessionStorage에서 이전 피드백 복원 또는 자동 요청
+  useEffect(() => {
+    const cached = loadFeedback(sentenceId);
+    if (cached) {
+      setFeedback(cached);
+      setState('done');
+    } else if (autoFetch) {
+      doFetch();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sentenceId]);
+
   // ── 초기 상태: 버튼 ──────────────────────────────────────────────
   if (state === 'idle') {
     return (
       <div style={{ marginTop: '1.2rem', textAlign: 'center' }}>
         <button
-          onClick={handleFetch}
+          onClick={doFetch}
           style={{
             display: 'inline-flex',
             alignItems: 'center',
@@ -154,7 +154,7 @@ export function AIFeedback({ sentenceId, quoteText, autoFetch = false }: AIFeedb
       >
         피드백을 가져오지 못했습니다.{' '}
         <button
-          onClick={handleFetch}
+          onClick={doFetch}
           style={{
             background: 'none',
             border: 'none',

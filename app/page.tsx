@@ -43,9 +43,6 @@ function loadSession(): SessionState | null {
   } catch { return null; }
 }
 
-function clearSession() {
-  try { sessionStorage.removeItem(SS_KEY); } catch {}
-}
 
 export default function Home() {
   const { data: session } = useSession();
@@ -80,11 +77,13 @@ export default function Home() {
 
     // sessionStorage에서 완료 상태 복원 (앱 전환 후 복귀 대응)
     const saved = loadSession();
-    if (saved?.isComplete) {
-      setIsComplete(true);
-      setCompleteStats(saved.completeStats);
+    if (saved) {
       setMode(saved.mode);
       setUserChoseMode(true);
+      if (saved.isComplete) {
+        setIsComplete(true);
+        setCompleteStats(saved.completeStats);
+      }
       return; // 복원 시 resize 기반 모드 자동 전환 불필요
     }
 
@@ -170,7 +169,8 @@ export default function Home() {
   const handleReset = () => {
     setIsComplete(false);
     setCompleteStats(null);
-    clearSession();
+    // 모드는 유지하면서 완료 상태만 초기화
+    saveSession({ isComplete: false, completeStats: null, mode });
     setResetKey((k) => k + 1);
     const newCount = incrementRepeatCount();
     setRepeatCount(newCount);
@@ -182,11 +182,11 @@ export default function Home() {
     if (isComplete) {
       setIsComplete(false);
       setCompleteStats(null);
-      clearSession();
       setResetKey((k) => k + 1);
     }
     setMode(newMode);
     setUserChoseMode(true);
+    saveSession({ isComplete: false, completeStats: null, mode: newMode });
   };
 
   if (!quote) {

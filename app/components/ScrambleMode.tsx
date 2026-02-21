@@ -59,6 +59,11 @@ export default function ScrambleMode({
     setSelected(newSelected);
   };
 
+  const handleClearAll = () => {
+    if (isComplete) return;
+    setSelected([]);
+  };
+
   const progress = Math.round((selected.length / scrambledWords.length) * 100);
 
   return (
@@ -116,13 +121,40 @@ export default function ScrambleMode({
               key={`${s.idx}-${i}`}
               className="answer-word"
               onClick={() => handleRemoveWord(i)}
-              title="클릭하여 제거"
             >
               {s.word}
             </span>
           ))
         )}
       </div>
+
+      {/* 되돌리기 안내 + 전체 초기화 */}
+      {selected.length > 0 && !isComplete && (
+        <div
+          className="flex items-center justify-between"
+          style={{ fontSize: '0.75rem', color: 'var(--ink-dim)', letterSpacing: '0.04em' }}
+        >
+          <span style={{ fontFamily: "'Crimson Pro', serif" }}>
+            위의 단어를 탭하면 제거됩니다
+          </span>
+          <button
+            onClick={handleClearAll}
+            className="cursor-pointer"
+            style={{
+              background: 'transparent',
+              border: '1px solid rgba(139,58,58,0.3)',
+              borderRadius: '2px',
+              padding: '0.2rem 0.5rem',
+              fontFamily: "'Crimson Pro', serif",
+              fontSize: '0.72rem',
+              color: 'var(--wrong)',
+              letterSpacing: '0.06em',
+            }}
+          >
+            전체 초기화
+          </button>
+        </div>
+      )}
 
       {/* Word pool */}
       <div className="flex flex-wrap gap-2">
