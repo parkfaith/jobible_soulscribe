@@ -10,25 +10,35 @@ const BASE_URL = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, '') ?? '';
 
 async function request<T>(
   path: string,
-  options: RequestInit = {}
+  options: RequestInit = {},
+  timeoutMs: number = 10000,
 ): Promise<T> {
   if (!BASE_URL) {
     throw new Error('API not configured');
   }
-  const res = await fetch(`${BASE_URL}${path}`, {
-    headers: {
-      'Content-Type': 'application/json',
-      ...options.headers,
-    },
-    ...options,
-  });
 
-  if (!res.ok) {
-    const errorText = await res.text();
-    throw new Error(`API 오류 ${res.status}: ${errorText}`);
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    const res = await fetch(`${BASE_URL}${path}`, {
+      headers: {
+        'Content-Type': 'application/json',
+        ...options.headers,
+      },
+      ...options,
+      signal: controller.signal,
+    });
+
+    if (!res.ok) {
+      const errorText = await res.text();
+      throw new Error(`API 오류 ${res.status}: ${errorText}`);
+    }
+
+    return res.json() as Promise<T>;
+  } finally {
+    clearTimeout(timeout);
   }
-
-  return res.json() as Promise<T>;
 }
 
 // ── 타입 정의 ─────────────────────────────────────────────────────

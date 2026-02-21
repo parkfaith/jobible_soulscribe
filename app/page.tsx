@@ -2,10 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
-import { getTodayQuote, getTodayQuoteIndex, Quote } from '@/lib/quotes';
+import { FALLBACK_QUOTE, Quote } from '@/lib/quotes';
 import { getStreak, markComplete, isCompletedToday } from '@/lib/streak';
 import { getTodayRepeatCount, incrementRepeatCount } from '@/lib/fading';
-import { postStudyLog, registerUser } from '@/lib/api';
+import { fetchTodaySentence, postStudyLog, registerUser } from '@/lib/api';
 import QuoteCard from './components/QuoteCard';
 import TranscriptionEngine from './components/TranscriptionEngine';
 import ScrambleMode from './components/ScrambleMode';
@@ -59,9 +59,26 @@ export default function Home() {
   const [repeatCount, setRepeatCount] = useState(0);
 
   useEffect(() => {
-    // 클라이언트 초기화
-    const todayQuote = getTodayQuote();
-    setQuote(todayQuote);
+    // 클라이언트 초기화 — 백엔드 API에서 오늘의 명언 가져오기
+    async function loadQuote() {
+      try {
+        const sentence = await fetchTodaySentence();
+        setQuote({
+          id: sentence.id,
+          text: sentence.text,
+          source: sentence.source ?? '',
+          context: sentence.context ?? '',
+          translation: sentence.translation ?? '',
+          category: sentence.category,
+          difficulty: sentence.difficulty,
+        });
+      } catch {
+        console.warn('API 호출 실패, 폴백 명언 사용');
+        setQuote(FALLBACK_QUOTE);
+      }
+    }
+    loadQuote();
+
     setCompletedToday(isCompletedToday());
     setRepeatCount(getTodayRepeatCount());
 
@@ -406,7 +423,7 @@ export default function Home() {
                 오늘의 학습을 이미 완료했습니다. 다시 연습할 수 있습니다.
               </span>
             </div>
-            <AIFeedback sentenceId={getTodayQuoteIndex()} quoteText={quote.text} />
+            <AIFeedback sentenceId={quote.id ?? 1} quoteText={quote.text} />
           </div>
         )}
 
@@ -420,7 +437,7 @@ export default function Home() {
               stats={completeStats}
               onReset={handleReset}
               quoteText={quote.text}
-              sentenceId={getTodayQuoteIndex()}
+              sentenceId={quote.id ?? 1}
             />
           ) : mode === 'transcription' ? (
             <TranscriptionEngine

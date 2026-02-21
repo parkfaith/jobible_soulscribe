@@ -49,3 +49,7 @@ venv/
 backend/.venv/
 backend/venv/
 backend/soulscribe_local.db
+backend/data/*.json
+
+# claude code
+.claude/
