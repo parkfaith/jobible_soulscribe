@@ -12,6 +12,7 @@ import ScrambleMode from './components/ScrambleMode';
 import ClozeMode from './components/ClozeMode';
 import CompleteOverlay from './components/CompleteOverlay';
 import { AuthButton } from './components/AuthButton';
+import { AIFeedback } from './components/AIFeedback';
 import InstallPrompt from './components/InstallPrompt';
 
 type Mode = 'transcription' | 'scramble' | 'cloze';
@@ -386,23 +387,26 @@ export default function Home() {
           </button>
         </div>
 
-        {/* 오늘 이미 완료한 경우 안내 배너 */}
+        {/* 오늘 이미 완료한 경우 안내 배너 + 선생님 피드백 */}
         {completedToday && !isComplete && (
-          <div
-            className="max-w-170 md:max-w-215 w-full mt-6 flex items-center gap-3 rounded-sm"
-            style={{
-              padding: '0.7rem 1.2rem',
-              background: 'rgba(90,138,90,0.08)',
-              border: '1px solid rgba(90,138,90,0.2)',
-              fontSize: '0.85rem',
-              color: 'var(--correct)',
-              letterSpacing: '0.04em',
-            }}
-          >
-            <span style={{ fontSize: '1rem' }}>✓</span>
-            <span style={{ fontFamily: "'Crimson Pro', serif" }}>
-              오늘의 학습을 이미 완료했습니다. 다시 연습할 수 있습니다.
-            </span>
+          <div className="max-w-170 md:max-w-215 w-full mt-6">
+            <div
+              className="flex items-center gap-3 rounded-sm"
+              style={{
+                padding: '0.7rem 1.2rem',
+                background: 'rgba(90,138,90,0.08)',
+                border: '1px solid rgba(90,138,90,0.2)',
+                fontSize: '0.85rem',
+                color: 'var(--correct)',
+                letterSpacing: '0.04em',
+              }}
+            >
+              <span style={{ fontSize: '1rem' }}>✓</span>
+              <span style={{ fontFamily: "'Crimson Pro', serif" }}>
+                오늘의 학습을 이미 완료했습니다. 다시 연습할 수 있습니다.
+              </span>
+            </div>
+            <AIFeedback sentenceId={getTodayQuoteIndex()} quoteText={quote.text} />
           </div>
         )}
 

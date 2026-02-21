@@ -123,17 +123,17 @@ export default function QuoteCard({ quote, hideText = false, fadeLevel = 0 }: Qu
           &ldquo;{quote.text}&rdquo;
         </p>
 
-        {/* 블러 오버레이 — 원문 보기/가리기 토글 */}
-        {hideText && (
+        {/* 블러 오버레이 — 원문 보기 (블러 상태일 때만 중앙 표시) */}
+        {hideText && !isRevealed && (
           <button
-            onClick={() => setIsRevealed(prev => !prev)}
+            onClick={() => setIsRevealed(true)}
             style={{
               position: 'absolute',
               inset: 0,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              background: isRevealed ? 'transparent' : 'rgba(21,19,16,0.15)',
+              background: 'rgba(21,19,16,0.15)',
               border: 'none',
               cursor: 'pointer',
               transition: 'all 0.3s ease',
@@ -152,7 +152,7 @@ export default function QuoteCard({ quote, hideText = false, fadeLevel = 0 }: Qu
                 color: 'var(--gold-dim)',
               }}
             >
-              {isRevealed ? '◉  가리기' : '👁  원문 보기'}
+              👁  원문 보기
             </span>
           </button>
         )}
@@ -169,6 +169,29 @@ export default function QuoteCard({ quote, hideText = false, fadeLevel = 0 }: Qu
           alignItems: 'center',
         }}
       >
+        {/* 원문 가리기 버튼 (원문 공개 상태일 때만) */}
+        {hideText && isRevealed && (
+          <button
+            onClick={() => setIsRevealed(false)}
+            title="원문 가리기"
+            style={{
+              background: 'none',
+              border: '1px solid rgba(201,168,76,0.2)',
+              borderRadius: '50%',
+              width: '2rem',
+              height: '2rem',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              color: 'var(--gold-dim)',
+              fontSize: '0.85rem',
+              transition: 'all 0.2s ease',
+            }}
+          >
+            ◉
+          </button>
+        )}
         {/* 공유 버튼 */}
         <button
           onClick={handleShare}

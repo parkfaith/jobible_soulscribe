@@ -138,6 +138,8 @@ const ShareableCard = forwardRef<HTMLDivElement, ShareableCardProps>(
             textAlign: 'center',
             maxWidth: '800px',
             margin: '24px 0 0 0',
+            wordBreak: 'keep-all',
+            overflowWrap: 'break-word',
           }}
         >
           {quote.translation}
@@ -153,32 +155,44 @@ const ShareableCard = forwardRef<HTMLDivElement, ShareableCardProps>(
           }}
         />
 
-        {/* 저자 */}
-        <p
+        {/* 저자 + 출처 */}
+        <div
           style={{
-            fontFamily: "'Crimson Pro', serif",
-            fontSize: '18px',
-            textTransform: 'uppercase',
-            letterSpacing: '0.12em',
-            color: '#9a9080',
-            margin: 0,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '10px',
           }}
         >
-          — {quote.source}
-        </p>
-
-        {/* 출처 */}
-        <p
-          style={{
-            fontFamily: "'Crimson Pro', serif",
-            fontSize: '15px',
-            fontStyle: 'italic',
-            color: '#8a6f32',
-            margin: '6px 0 0 0',
-          }}
-        >
-          {quote.context}
-        </p>
+          <p
+            style={{
+              fontFamily: "'Crimson Pro', serif",
+              fontSize: '18px',
+              textTransform: 'uppercase',
+              letterSpacing: '0.12em',
+              color: '#9a9080',
+              margin: 0,
+              textAlign: 'center',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            — {quote.source}
+          </p>
+          <p
+            style={{
+              fontFamily: "'Crimson Pro', serif",
+              fontSize: '15px',
+              fontStyle: 'italic',
+              color: '#8a6f32',
+              margin: 0,
+              textAlign: 'center',
+              maxWidth: '800px',
+              wordBreak: 'keep-all',
+            }}
+          >
+            {quote.context}
+          </p>
+        </div>
 
         {/* 브랜딩 */}
         <div

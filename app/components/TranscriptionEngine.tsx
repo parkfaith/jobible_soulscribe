@@ -37,12 +37,12 @@ export default function TranscriptionEngine({
 
     setUserInput(value);
 
-    // Calculate accuracy
+    // Calculate accuracy — 원문 전체 길이 대비 정확도
     let correct = 0;
     for (let i = 0; i < value.length; i++) {
       if (value[i] === originalText[i]) correct++;
     }
-    const acc = value.length > 0 ? Math.round((correct / value.length) * 100) : null;
+    const acc = value.length > 0 ? Math.round((correct / originalText.length) * 100) : null;
     setAccuracy(acc);
 
     // 완전 일치 시 자동 완료
