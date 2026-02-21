@@ -6,6 +6,48 @@ joBiBle SoulScribe 변경 이력
 
 ---
 
+## [2026-02-21] - 코드 점검 및 정리
+
+### 삭제 (Removed)
+- `backend/seed.py` — 초기 30개 명언 시드 일회성 스크립트 삭제 (`pipeline/seed_enriched.py`로 대체)
+
+### 수정 (Fixed)
+- `app/page.tsx` — `postStudyLog()` 호출 시 `sentence_id` 누락 수정 (transcription/scramble/cloze 3곳)
+
+### 수정 파일 목록
+- `backend/seed.py` *(삭제)*
+- `app/page.tsx`
+
+---
+
+## [2026-02-21] - 명언 수집 파이프라인 + 프론트엔드 API 전환
+
+### 추가 (Added)
+- `backend/pipeline/collect.py` — Quotable API에서 명언 수집 (GitHub 폴백 지원)
+- `backend/pipeline/enrich.py` — GPT-4o-mini 배치로 한글 번역/카테고리/context 생성
+- `backend/pipeline/seed_enriched.py` — enriched 데이터를 Turso DB에 시드 (중복 체크)
+- `backend/pipeline/run_pipeline.py` — collect → enrich → seed 순차 실행 오케스트레이터
+
+### 수정 (Changed)
+- `lib/quotes.ts` — 하드코딩된 30개 명언 배열 제거, `Quote` 타입에 `id?: number` 추가, `FALLBACK_QUOTE` 1개만 유지
+- `app/page.tsx` — `getTodayQuote()` → `fetchTodaySentence()` API 호출로 전환, API 실패 시 FALLBACK_QUOTE 사용
+- `lib/api.ts` — `request()` 함수에 AbortController 기반 10초 timeout 추가 (Render cold start 대비)
+- `.gitignore` — `backend/data/*.json`, `.claude/` 제외 추가
+
+### 데이터
+- Turso DB 총 530개 명언 (기존 30개 + Quotable API 500개)
+- 약 1년 5개월(530일) 주기로 순환, 연중 일수 기반 선택
+
+### 수정 파일 목록
+- `backend/pipeline/__init__.py` *(신규)*
+- `backend/pipeline/collect.py` *(신규)*
+- `backend/pipeline/enrich.py` *(신규)*
+- `backend/pipeline/seed_enriched.py` *(신규)*
+- `backend/pipeline/run_pipeline.py` *(신규)*
+- `lib/quotes.ts`, `app/page.tsx`, `lib/api.ts`, `.gitignore`
+
+---
+
 ## [2026-02-21] - UI/UX 개선 및 버그 수정 일괄 반영
 
 ### UI/UX 개선

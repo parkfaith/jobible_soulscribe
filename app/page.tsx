@@ -150,6 +150,7 @@ export default function Home() {
     // 학습 기록 서버 저장 (실패해도 UX 차단 없음)
     postStudyLog({
       user_id: session?.user?.id ?? null,
+      sentence_id: quote?.id ?? null,
       mode: 'transcription',
       accuracy,
       time_seconds: time,
@@ -166,6 +167,7 @@ export default function Home() {
 
     postStudyLog({
       user_id: session?.user?.id ?? null,
+      sentence_id: quote?.id ?? null,
       mode: 'scramble',
     }).catch(() => {});
   };
@@ -180,6 +182,7 @@ export default function Home() {
 
     postStudyLog({
       user_id: session?.user?.id ?? null,
+      sentence_id: quote?.id ?? null,
       mode: 'cloze',
     }).catch(() => {});
   };
