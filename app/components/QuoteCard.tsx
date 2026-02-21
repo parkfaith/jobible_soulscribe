@@ -136,31 +136,24 @@ export default function QuoteCard({ quote, hideText = false, fadeLevel = 0 }: Qu
               background: isRevealed ? 'transparent' : 'rgba(21,19,16,0.15)',
               border: 'none',
               cursor: 'pointer',
-              color: isRevealed ? 'rgba(138,111,50,0.5)' : 'var(--gold-dim)',
-              fontFamily: "'Crimson Pro', serif",
-              fontSize: '0.8rem',
-              letterSpacing: '0.12em',
-              gap: '0.4rem',
               transition: 'all 0.3s ease',
             }}
           >
-            {isRevealed ? (
-              <span style={{ marginTop: 'auto', paddingBottom: '0.2rem' }}>
-                ◉&nbsp;가리기
-              </span>
-            ) : (
-              <span
-                style={{
-                  background: 'rgba(21,19,16,0.7)',
-                  border: '1px solid rgba(201,168,76,0.25)',
-                  borderRadius: '2px',
-                  padding: '0.35rem 1rem',
-                  backdropFilter: 'blur(2px)',
-                }}
-              >
-                👁&nbsp;&nbsp;원문 보기
-              </span>
-            )}
+            <span
+              style={{
+                background: 'rgba(21,19,16,0.7)',
+                border: '1px solid rgba(201,168,76,0.25)',
+                borderRadius: '2px',
+                padding: '0.35rem 1rem',
+                backdropFilter: 'blur(2px)',
+                fontFamily: "'Crimson Pro', serif",
+                fontSize: '0.8rem',
+                letterSpacing: '0.12em',
+                color: 'var(--gold-dim)',
+              }}
+            >
+              {isRevealed ? '◉  가리기' : '👁  원문 보기'}
+            </span>
           </button>
         )}
       </div>

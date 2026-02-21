@@ -6,6 +6,38 @@ joBiBle SoulScribe 변경 이력
 
 ---
 
+## [2026-02-21] - UI/UX 개선 및 버그 수정 일괄 반영
+
+### UI/UX 개선
+- **원문 보기/가리기 버튼 통일**: "가리기" 버튼이 글 위에 흐리게 겹쳐 보이던 문제 해결. 보기/가리기 모두 동일한 카드 스타일 버튼으로 중앙 표시
+- **모드 탭 레이아웃 변경**: 가로 한 줄(아이콘+텍스트) → 세로 배치(아이콘 위, 텍스트 아래)로 변경
+- **Cloze 아이콘 변경**: 유니코드 사각형(iOS 미지원 + 빈칸 혼동) → `⋯`(말줄임표)
+- **Scramble 단어 되돌리기 UX**: 답란 단어에 점선 밑줄 + "위의 단어를 탭하면 제거됩니다" 안내 + "전체 초기화" 버튼 추가
+
+### 버그 수정
+- **선생님 피드백 자동 요청**: `handleFetch` 호이스팅 버그로 autoFetch가 동작하지 않던 문제 수정
+- **완료 후 모드 전환 불가**: `switchMode`의 `if (!isComplete)` 가드가 탭 클릭을 차단 → 완료 상태에서 모드 전환 시 자동 리셋
+- **iPad 모드 초기화**: 재수행 시 Scramble로 초기화 → sessionStorage에 모드 저장하여 보존
+- **앱 전환 후 상태 유실**: 이미지 공유 후 복귀 시 완료 상태 + AI 피드백 소실 → sessionStorage 보존/복원
+- **iOS 자동 줌**: viewport `maximum-scale=1, user-scalable=false` 설정
+
+### 이미지 공유 개선
+- 저자/제목 겹침 문제 해결 (padding 확대 + flow 레이아웃 통일)
+- 캡쳐 이미지에 한글 번역 추가
+
+### 신규 기능
+- **PWA 설치 안내 배너**: Android `beforeinstallprompt` / iOS Safari 안내 + 닫기 시 재표시 방지
+- **Service Worker 등록**: 최소 SW (`public/sw.js`) — Chrome/Android 설치 프롬프트 요건 충족
+
+### 수정 파일 목록
+- `app/page.tsx`, `app/components/QuoteCard.tsx`, `app/components/AIFeedback.tsx`
+- `app/components/CompleteOverlay.tsx`, `app/components/ScrambleMode.tsx`
+- `app/components/ShareableCard.tsx`, `app/components/InstallPrompt.tsx` *(신규)*
+- `app/layout.tsx`, `app/globals.css`
+- `public/sw.js` *(신규)*
+
+---
+
 ## [2026-02-19] - UX 개선: Scramble/Cloze 모드에서 원문 블러 처리
 
 ### 추가 (Added)

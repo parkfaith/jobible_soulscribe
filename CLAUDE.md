@@ -65,3 +65,8 @@ lib/
 - Cormorant Garamond: 명언, 제목
 - Crimson Pro: 본문
 - IM Fell English: 로고, 날짜
+
+## Project Rules (필수 준수)
+
+1. **언어**: 모든 응답과 코드 주석은 **한국어**로 작성. 기술 용어는 영어 병기 가능 (예: 변수(Variable))
+2. **CHANGELOG.md**: 코드 수정 후 반드시 업데이트 — 날짜, 카테고리, 상세 내용, 수정 파일 목록 포함

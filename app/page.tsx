@@ -308,7 +308,7 @@ export default function Home() {
           fadeLevel={isComplete ? 0 : Math.min(3, repeatCount) as 0 | 1 | 2 | 3}
         />
 
-        {/* 모드 탭 — 3가지 모드 */}
+        {/* 모드 탭 — 3가지 모드 (아이콘 위, 텍스트 아래) */}
         <div
           className="max-w-170 md:max-w-215 w-full flex mt-8 rounded-sm overflow-hidden opacity-0 animate-[fadeIn_0.6s_ease_1s_forwards]"
           style={{ border: '1px solid rgba(201,168,76,0.15)' }}
@@ -320,17 +320,22 @@ export default function Home() {
               mode === 'transcription' ? '' : 'hover:bg-[rgba(255,255,255,0.03)]'
             }`}
             style={{
-              padding: '0.75rem',
+              padding: '0.6rem 0.5rem',
               background: mode === 'transcription' ? 'rgba(201,168,76,0.1)' : 'transparent',
               border: 'none',
               borderRight: '1px solid rgba(201,168,76,0.12)',
               color: mode === 'transcription' ? 'var(--gold)' : 'var(--ink-dim)',
               fontFamily: "'Crimson Pro', serif",
-              fontSize: '0.82rem',
-              letterSpacing: '0.12em',
+              fontSize: '0.72rem',
+              letterSpacing: '0.1em',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '0.25rem',
             }}
           >
-            ✍ Transcription
+            <span style={{ fontSize: '1.1rem' }}>✍</span>
+            <span>Transcription</span>
           </button>
           {/* 단어 스크램블 탭 */}
           <button
@@ -339,17 +344,22 @@ export default function Home() {
               mode === 'scramble' ? '' : 'hover:bg-[rgba(255,255,255,0.03)]'
             }`}
             style={{
-              padding: '0.75rem',
+              padding: '0.6rem 0.5rem',
               background: mode === 'scramble' ? 'rgba(201,168,76,0.1)' : 'transparent',
               border: 'none',
               borderRight: '1px solid rgba(201,168,76,0.12)',
               color: mode === 'scramble' ? 'var(--gold)' : 'var(--ink-dim)',
               fontFamily: "'Crimson Pro', serif",
-              fontSize: '0.82rem',
-              letterSpacing: '0.12em',
+              fontSize: '0.72rem',
+              letterSpacing: '0.1em',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '0.25rem',
             }}
           >
-            ◈ Scramble
+            <span style={{ fontSize: '1.1rem' }}>◈</span>
+            <span>Scramble</span>
           </button>
           {/* 빈칸 채우기 탭 */}
           <button
@@ -358,16 +368,21 @@ export default function Home() {
               mode === 'cloze' ? '' : 'hover:bg-[rgba(255,255,255,0.03)]'
             }`}
             style={{
-              padding: '0.75rem',
+              padding: '0.6rem 0.5rem',
               background: mode === 'cloze' ? 'rgba(201,168,76,0.1)' : 'transparent',
               border: 'none',
               color: mode === 'cloze' ? 'var(--gold)' : 'var(--ink-dim)',
               fontFamily: "'Crimson Pro', serif",
-              fontSize: '0.82rem',
-              letterSpacing: '0.12em',
+              fontSize: '0.72rem',
+              letterSpacing: '0.1em',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '0.25rem',
             }}
           >
-            <span style={{ display: 'inline-block', width: '0.6em', height: '0.6em', border: '1.5px solid currentColor', borderRadius: '1px', marginRight: '0.3em', verticalAlign: 'middle', position: 'relative', top: '-0.05em' }} /> Cloze
+            <span style={{ fontSize: '1.1rem' }}>⋯</span>
+            <span>Cloze</span>
           </button>
         </div>
 
