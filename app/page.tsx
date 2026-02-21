@@ -23,13 +23,37 @@ interface CompleteStats {
   charCount?: number;
 }
 
+// sessionStorage 키
+const SS_KEY = 'soulscribe-session';
+
+interface SessionState {
+  isComplete: boolean;
+  completeStats: CompleteStats | null;
+  mode: Mode;
+}
+
+function saveSession(state: SessionState) {
+  try { sessionStorage.setItem(SS_KEY, JSON.stringify(state)); } catch {}
+}
+
+function loadSession(): SessionState | null {
+  try {
+    const raw = sessionStorage.getItem(SS_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch { return null; }
+}
+
+function clearSession() {
+  try { sessionStorage.removeItem(SS_KEY); } catch {}
+}
+
 export default function Home() {
   const { data: session } = useSession();
   const [quote, setQuote] = useState<Quote | null>(null);
   const [dateStr, setDateStr] = useState('');
   const [streak, setStreak] = useState(0);
   const [mode, setMode] = useState<Mode>('transcription');
-  const [userChoseMode, setUserChoseMode] = useState(false); // 사용자가 수동으로 모드 선택했는지
+  const [userChoseMode, setUserChoseMode] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
   const [completeStats, setCompleteStats] = useState<CompleteStats | null>(null);
   const [resetKey, setResetKey] = useState(0);
@@ -54,6 +78,16 @@ export default function Home() {
 
     setStreak(getStreak());
 
+    // sessionStorage에서 완료 상태 복원 (앱 전환 후 복귀 대응)
+    const saved = loadSession();
+    if (saved?.isComplete) {
+      setIsComplete(true);
+      setCompleteStats(saved.completeStats);
+      setMode(saved.mode);
+      setUserChoseMode(true);
+      return; // 복원 시 resize 기반 모드 자동 전환 불필요
+    }
+
     // 화면 크기에 따른 기본 모드 설정 (768px 기준)
     const isMobile = window.innerWidth < 768;
     setMode(isMobile ? 'scramble' : 'transcription');
@@ -61,7 +95,7 @@ export default function Home() {
     // resize 시 사용자가 수동 선택하지 않은 경우에만 모드 자동 전환
     const handleResize = () => {
       setUserChoseMode(prev => {
-        if (prev) return prev; // 사용자가 선택했으면 자동 전환 안 함
+        if (prev) return prev;
         const mobile = window.innerWidth < 768;
         setMode(mobile ? 'scramble' : 'transcription');
         return prev;
@@ -84,13 +118,15 @@ export default function Home() {
   }, [session?.user?.id]);
 
   const handleTranscriptionComplete = (accuracy: number, time: number) => {
-    setIsComplete(true);
-    setCompleteStats({
+    const stats: CompleteStats = {
       mode: 'transcription',
       accuracy,
       time,
       charCount: quote?.text.length,
-    });
+    };
+    setIsComplete(true);
+    setCompleteStats(stats);
+    saveSession({ isComplete: true, completeStats: stats, mode: 'transcription' });
     const newStreak = markComplete();
     setStreak(newStreak);
 
@@ -104,8 +140,10 @@ export default function Home() {
   };
 
   const handleScrambleComplete = () => {
+    const stats: CompleteStats = { mode: 'scramble' };
     setIsComplete(true);
-    setCompleteStats({ mode: 'scramble' });
+    setCompleteStats(stats);
+    saveSession({ isComplete: true, completeStats: stats, mode: 'scramble' });
     const newStreak = markComplete();
     setStreak(newStreak);
 
@@ -116,8 +154,10 @@ export default function Home() {
   };
 
   const handleClozeComplete = () => {
+    const stats: CompleteStats = { mode: 'cloze' };
     setIsComplete(true);
-    setCompleteStats({ mode: 'cloze' });
+    setCompleteStats(stats);
+    saveSession({ isComplete: true, completeStats: stats, mode: 'cloze' });
     const newStreak = markComplete();
     setStreak(newStreak);
 
@@ -130,6 +170,7 @@ export default function Home() {
   const handleReset = () => {
     setIsComplete(false);
     setCompleteStats(null);
+    clearSession();
     setResetKey((k) => k + 1);
     const newCount = incrementRepeatCount();
     setRepeatCount(newCount);
@@ -141,10 +182,11 @@ export default function Home() {
     if (isComplete) {
       setIsComplete(false);
       setCompleteStats(null);
+      clearSession();
       setResetKey((k) => k + 1);
     }
     setMode(newMode);
-    setUserChoseMode(true); // 사용자 수동 선택 — resize로 자동 전환하지 않음
+    setUserChoseMode(true);
   };
 
   if (!quote) {
@@ -325,7 +367,7 @@ export default function Home() {
               letterSpacing: '0.12em',
             }}
           >
-            ☐ Cloze
+            ▢ Cloze
           </button>
         </div>
 

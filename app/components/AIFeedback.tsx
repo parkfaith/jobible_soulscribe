@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { fetchFeedback, FeedbackResponse } from '@/lib/api';
 
 interface AIFeedbackProps {
@@ -16,16 +16,41 @@ const TAB_CONFIG: { key: FeedbackTab; label: string; icon: string }[] = [
   { key: 'challenge', label: '연습 문장', icon: '✍' },
 ];
 
+const FEEDBACK_SS_KEY = 'soulscribe-feedback';
+
+function saveFeedback(id: number, data: FeedbackResponse) {
+  try { sessionStorage.setItem(FEEDBACK_SS_KEY, JSON.stringify({ id, data })); } catch {}
+}
+
+function loadFeedback(id: number): FeedbackResponse | null {
+  try {
+    const raw = sessionStorage.getItem(FEEDBACK_SS_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    return parsed.id === id ? parsed.data : null;
+  } catch { return null; }
+}
+
 export function AIFeedback({ sentenceId, quoteText }: AIFeedbackProps) {
   const [state, setState] = useState<'idle' | 'loading' | 'done' | 'error'>('idle');
   const [feedback, setFeedback] = useState<FeedbackResponse | null>(null);
   const [activeTab, setActiveTab] = useState<FeedbackTab>('grammar');
+
+  // 마운트 시 sessionStorage에서 이전 피드백 복원
+  useEffect(() => {
+    const cached = loadFeedback(sentenceId);
+    if (cached) {
+      setFeedback(cached);
+      setState('done');
+    }
+  }, [sentenceId]);
 
   const handleFetch = async () => {
     setState('loading');
     try {
       const data = await fetchFeedback({ sentence_id: sentenceId, text: quoteText });
       setFeedback(data);
+      saveFeedback(sentenceId, data);
       setState('done');
     } catch {
       setState('error');
