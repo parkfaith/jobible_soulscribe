@@ -171,23 +171,25 @@ export default function Home() {
     }).catch(() => {});
   };
 
-  const handleScrambleComplete = () => {
-    markModeComplete({ mode: 'scramble' });
+  const handleScrambleComplete = (accuracy: number) => {
+    markModeComplete({ mode: 'scramble', accuracy });
 
     postStudyLog({
       user_id: session?.user?.id ?? null,
       sentence_id: quote?.id ?? null,
       mode: 'scramble',
+      accuracy,
     }).catch(() => {});
   };
 
-  const handleClozeComplete = () => {
-    markModeComplete({ mode: 'cloze' });
+  const handleClozeComplete = (accuracy: number) => {
+    markModeComplete({ mode: 'cloze', accuracy });
 
     postStudyLog({
       user_id: session?.user?.id ?? null,
       sentence_id: quote?.id ?? null,
       mode: 'cloze',
+      accuracy,
     }).catch(() => {});
   };
 
@@ -344,7 +346,7 @@ export default function Home() {
         <QuoteCard
           quote={quote}
           hideText={mode !== 'transcription' && !isComplete}
-          fadeLevel={isComplete ? 0 : Math.min(3, repeatCount) as 0 | 1 | 2 | 3}
+          fadeLevel={mode === 'transcription' && !isComplete ? Math.min(3, repeatCount) as 0 | 1 | 2 | 3 : 0}
         />
 
         {/* 모드 탭 — 3가지 모드 (아이콘 위, 텍스트 아래) */}

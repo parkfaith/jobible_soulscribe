@@ -171,10 +171,20 @@ export function AIFeedback({ sentenceId, quoteText, autoFetch = false }: AIFeedb
   }
 
   // ── 완료 상태: 3탭 피드백 ────────────────────────────────────────
+
+  // 번호 항목(①②③ 또는 1. 2. 3.) 앞에 줄바꿈을 보장하는 후처리
+  const ensureLineBreaks = (text: string): string => {
+    return text
+      .replace(/(?<!\n)([①②③④⑤])/g, '\n$1')   // ①②③ 앞에 줄바꿈
+      .replace(/(?<!\n)(\d+\.\s)/g, '\n$1')       // 1. 2. 3. 앞에 줄바꿈
+      .replace(/(?<!\n)(번역[:：])/g, '\n$1')      // "번역:" 앞에 줄바꿈
+      .replace(/^\n/, '');                          // 첫 줄 불필요한 줄바꿈 제거
+  };
+
   const tabContent: Record<FeedbackTab, string> = {
-    grammar: feedback?.grammar_analysis ?? '',
-    nuance: feedback?.nuance_insights ?? '',
-    challenge: feedback?.practice_challenge ?? '',
+    grammar: ensureLineBreaks(feedback?.grammar_analysis ?? ''),
+    nuance: ensureLineBreaks(feedback?.nuance_insights ?? ''),
+    challenge: ensureLineBreaks(feedback?.practice_challenge ?? ''),
   };
 
   return (

@@ -6,6 +6,34 @@ joBiBle SoulScribe 변경 이력
 
 ---
 
+## [2026-02-22] - UI/UX 개선 및 정확도 계산 수정
+
+### 수정 (Fixed)
+- **Scramble/Cloze 정확도 미계산**: 틀리게 해도 항상 정상 완료로 표시되던 문제 수정
+  - ScrambleMode: 단어 순서 비교로 정확도 계산 (위치별 일치 비율)
+  - ClozeMode: 빈칸 정답 수 / 전체 빈칸 수로 정확도 계산
+  - CompleteOverlay: Scramble/Cloze에서도 정확도% 통계 표시
+- **Scramble/Cloze에서 원문 fading 적용 문제**: Progressive Fading이 Transcription 전용인데 다른 모드에도 적용되어 원문 보기 시 흐리게 보이던 문제 수정
+- **Google 프로필 이미지 깨짐**: `referrerPolicy="no-referrer"` 추가하여 Google 이미지 서버 요청 차단 해결
+- **AI 피드백 줄바꿈 미적용**: 번호 항목(①②③, 1.2.3.)이 한 줄로 이어지던 문제 수정
+  - 프론트엔드: `ensureLineBreaks()` 후처리로 기존 캐시 데이터에도 줄바꿈 보장
+  - 백엔드: GPT 프롬프트에 ①②③ 번호 + 줄바꿈 형식 명시
+
+### 추가 (Added)
+- **원문 선명 보기 토글**: Transcription 모드 fading 중 우측 상단 👁 버튼으로 일시 선명 보기/복원
+
+### 수정 파일 목록
+- `app/components/ScrambleMode.tsx` — 정확도 계산 + onComplete 시그니처 변경
+- `app/components/ClozeMode.tsx` — 정확도 계산 + onComplete 시그니처 변경
+- `app/components/CompleteOverlay.tsx` — Scramble/Cloze 정확도 통계 표시
+- `app/components/QuoteCard.tsx` — 원문 선명 보기 토글 + fadeLevel 조건 분리
+- `app/components/AuthButton.tsx` — referrerPolicy 추가
+- `app/components/AIFeedback.tsx` — ensureLineBreaks 후처리
+- `app/page.tsx` — fadeLevel 조건 수정 + 정확도 핸들러 수정
+- `backend/routers/feedback.py` — GPT 프롬프트 줄바꿈 형식 명시
+
+---
+
 ## [2026-02-22] - 4가지 버그 수정
 
 ### 수정 (Fixed)

@@ -68,17 +68,13 @@ export default function CompleteOverlay({
             <br />
             오늘의 문장이 당신의 손끝에 새겨졌습니다.
           </>
-        ) : isCloze ? (
-          <>
-            모든 빈칸을 정확히 채웠습니다.
-            <br />
-            핵심 단어들이 당신의 기억 속에 새겨졌습니다.
-          </>
         ) : (
           <>
-            모든 단어를 올바른 순서로 배열했습니다.
+            정확도 {stats.accuracy ?? 0}%로 완성했습니다.
             <br />
-            문장의 흐름이 당신의 것이 되었습니다.
+            {isCloze
+              ? '핵심 단어들이 당신의 기억 속에 새겨졌습니다.'
+              : '문장의 흐름이 당신의 것이 되었습니다.'}
           </>
         )}
       </p>
@@ -167,7 +163,7 @@ export default function CompleteOverlay({
                 color: 'var(--gold)',
               }}
             >
-              ✓
+              {stats.accuracy ?? 0}%
             </span>
             <span
               className="uppercase"
@@ -176,7 +172,7 @@ export default function CompleteOverlay({
                 fontSize: '0.72rem',
               }}
             >
-              {isCloze ? 'Cloze' : 'Scramble'} Complete
+              {isCloze ? 'Cloze' : 'Scramble'} Accuracy
             </span>
           </div>
         )}

@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo } from 'react';
 
 interface ClozeModeProps {
   originalText: string;
-  onComplete: () => void;
+  onComplete: (accuracy: number) => void;
   isComplete: boolean;
 }
 
@@ -71,12 +71,12 @@ export default function ClozeMode({
     });
     setClozeWords(updated);
 
-    // 모든 빈칸을 맞췄으면 완료
+    // 모든 빈칸을 맞췄으면 자동 완료 (정확도 100%)
     const allCorrect = updated
       .filter(cw => cw.isCloze)
       .every(cw => cw.isCorrect);
     if (allCorrect) {
-      onComplete();
+      onComplete(100);
     }
   };
 
@@ -206,7 +206,14 @@ export default function ClozeMode({
       {/* 제출 버튼 — 하나 이상 입력 후 표시 */}
       {clozeWords.some(cw => cw.isCloze && cw.userInput.length > 0) && !isComplete && (
         <button
-          onClick={onComplete}
+          onClick={() => {
+            const clozeItems = clozeWords.filter(cw => cw.isCloze);
+            const correctCount = clozeItems.filter(cw => cw.isCorrect).length;
+            const accuracy = clozeItems.length > 0
+              ? Math.round((correctCount / clozeItems.length) * 100)
+              : 0;
+            onComplete(accuracy);
+          }}
           className="uppercase w-full cursor-pointer rounded-sm transition-all hover:bg-[rgba(201,168,76,0.1)]"
           style={{
             background: 'transparent',

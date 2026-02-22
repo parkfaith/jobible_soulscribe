@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo } from 'react';
 
 interface ScrambleModeProps {
   originalText: string;
-  onComplete: () => void;
+  onComplete: (accuracy: number) => void;
   isComplete: boolean;
 }
 
@@ -37,19 +37,22 @@ export default function ScrambleMode({
     const newSelected = [...selected, { idx, word: scrambledWords[idx] }];
     setSelected(newSelected);
 
-    // 모든 단어 배치 + 완전 일치 시 자동 완료
+    // 모든 단어 배치 + 완전 일치 시 자동 완료 (정확도 100%)
     if (newSelected.length === scrambledWords.length) {
       const sentence = newSelected.map((s) => s.word).join(' ');
       if (sentence === originalText) {
-        onComplete();
+        onComplete(100);
       }
     }
   };
 
-  // 제출 버튼 핸들러 — 순서가 틀려도 완료 처리
+  // 제출 버튼 핸들러 — 단어 순서 비교 후 정확도 계산
   const handleSubmit = () => {
     if (isComplete) return;
-    onComplete();
+    const userWords = selected.map((s) => s.word);
+    const correctCount = userWords.filter((w, i) => w === originalWords[i]).length;
+    const accuracy = Math.round((correctCount / originalWords.length) * 100);
+    onComplete(accuracy);
   };
 
   const handleRemoveWord = (selIdx: number) => {

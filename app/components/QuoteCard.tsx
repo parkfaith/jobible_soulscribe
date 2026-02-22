@@ -21,6 +21,7 @@ const FADE_STYLES: Record<number, { filter: string; opacity: number }> = {
 export default function QuoteCard({ quote, hideText = false, fadeLevel = 0 }: QuoteCardProps) {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isRevealed, setIsRevealed] = useState(false);
+  const [isFadeRevealed, setIsFadeRevealed] = useState(false);
   const [isSharing, setIsSharing] = useState(false);
   const shareableCardRef = useRef<HTMLDivElement>(null);
 
@@ -28,6 +29,11 @@ export default function QuoteCard({ quote, hideText = false, fadeLevel = 0 }: Qu
   useEffect(() => {
     if (hideText) setIsRevealed(false);
   }, [hideText]);
+
+  // fadeLevel이 0이 되면 선명 보기 해제
+  useEffect(() => {
+    if (fadeLevel === 0) setIsFadeRevealed(false);
+  }, [fadeLevel]);
 
   // 언마운트 시 Speech Synthesis 정리 (메모리 누수 방지)
   useEffect(() => {
@@ -114,9 +120,9 @@ export default function QuoteCard({ quote, hideText = false, fadeLevel = 0 }: Qu
             letterSpacing: '0.01em',
             filter: hideText && !isRevealed
               ? 'blur(7px)'
-              : FADE_STYLES[fadeLevel].filter,
-            opacity: hideText && !isRevealed ? 1 : FADE_STYLES[fadeLevel].opacity,
-            userSelect: (hideText && !isRevealed) || fadeLevel >= 2 ? 'none' : 'auto',
+              : isFadeRevealed ? 'none' : FADE_STYLES[fadeLevel].filter,
+            opacity: hideText && !isRevealed ? 1 : isFadeRevealed ? 1 : FADE_STYLES[fadeLevel].opacity,
+            userSelect: (hideText && !isRevealed) || (!isFadeRevealed && fadeLevel >= 2) ? 'none' : 'auto',
             transition: 'filter 0.3s ease, opacity 0.3s ease',
           }}
         >
@@ -169,6 +175,29 @@ export default function QuoteCard({ quote, hideText = false, fadeLevel = 0 }: Qu
           alignItems: 'center',
         }}
       >
+        {/* 원문 선명 보기 토글 (Transcription 모드 fading 중일 때만) */}
+        {fadeLevel > 0 && !hideText && (
+          <button
+            onClick={() => setIsFadeRevealed(prev => !prev)}
+            title={isFadeRevealed ? '원문 가리기' : '원문 보기'}
+            style={{
+              background: isFadeRevealed ? 'rgba(201,168,76,0.1)' : 'none',
+              border: '1px solid rgba(201,168,76,0.2)',
+              borderRadius: '50%',
+              width: '2rem',
+              height: '2rem',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              color: isFadeRevealed ? 'var(--gold)' : 'var(--gold-dim)',
+              fontSize: '0.85rem',
+              transition: 'all 0.2s ease',
+            }}
+          >
+            {isFadeRevealed ? '◉' : '👁'}
+          </button>
+        )}
         {/* 원문 가리기 버튼 (원문 공개 상태일 때만) */}
         {hideText && isRevealed && (
           <button

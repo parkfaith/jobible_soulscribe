@@ -30,6 +30,7 @@ export function AuthButton() {
           <img
             src={session.user.image}
             alt={session.user.name ?? ''}
+            referrerPolicy="no-referrer"
             style={{
               width: '1.6rem',
               height: '1.6rem',
