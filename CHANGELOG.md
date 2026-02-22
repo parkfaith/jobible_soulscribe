@@ -6,6 +6,21 @@ joBiBle SoulScribe 변경 이력
 
 ---
 
+## [2026-02-22] - 4가지 버그 수정
+
+### 수정 (Fixed)
+- **Turso DB 시드 누락**: 파이프라인이 로컬 SQLite에만 시드 → Turso HTTP API로 500개 직접 시드 완료
+- **선생님 피드백 첫 요청 실패**: fetchFeedback timeout 10초 → 30초로 증가 (Render cold start + GPT 호출 대비)
+- **AI 피드백 텍스트 중앙정렬**: 탭 내용에 `textAlign: 'left'` 추가하여 좌측정렬로 변경
+- **모드 전환 시 완료 상태 초기화**: 모드별 완료 상태를 `modeCompleted`로 개별 저장, 전환 시 복원
+
+### 수정 파일 목록
+- `lib/api.ts` — fetchFeedback timeout 30초
+- `app/components/AIFeedback.tsx` — 좌측정렬
+- `app/page.tsx` — modeCompleted 상태 관리
+
+---
+
 ## [2026-02-21] - 공유 이미지 카드 레이아웃 개선
 
 ### 수정 (Fixed)

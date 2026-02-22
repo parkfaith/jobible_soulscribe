@@ -31,6 +31,8 @@ interface SessionState {
   isComplete: boolean;
   completeStats: CompleteStats | null;
   mode: Mode;
+  // 모드별 완료 상태 저장
+  modeCompleted?: Partial<Record<Mode, CompleteStats>>;
 }
 
 function saveSession(state: SessionState) {
@@ -54,6 +56,7 @@ export default function Home() {
   const [userChoseMode, setUserChoseMode] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
   const [completeStats, setCompleteStats] = useState<CompleteStats | null>(null);
+  const [modeCompleted, setModeCompleted] = useState<Partial<Record<Mode, CompleteStats>>>({});
   const [resetKey, setResetKey] = useState(0);
   const [completedToday, setCompletedToday] = useState(false);
   const [repeatCount, setRepeatCount] = useState(0);
@@ -98,6 +101,9 @@ export default function Home() {
     if (saved) {
       setMode(saved.mode);
       setUserChoseMode(true);
+      if (saved.modeCompleted) {
+        setModeCompleted(saved.modeCompleted);
+      }
       if (saved.isComplete) {
         setIsComplete(true);
         setCompleteStats(saved.completeStats);
@@ -134,6 +140,19 @@ export default function Home() {
     }
   }, [session?.user?.id]);
 
+  // 모드 완료 시 공통 처리
+  const markModeComplete = (stats: CompleteStats) => {
+    setIsComplete(true);
+    setCompleteStats(stats);
+    setModeCompleted(prev => {
+      const updated = { ...prev, [stats.mode]: stats };
+      saveSession({ isComplete: true, completeStats: stats, mode: stats.mode, modeCompleted: updated });
+      return updated;
+    });
+    const newStreak = markComplete();
+    setStreak(newStreak);
+  };
+
   const handleTranscriptionComplete = (accuracy: number, time: number) => {
     const stats: CompleteStats = {
       mode: 'transcription',
@@ -141,13 +160,8 @@ export default function Home() {
       time,
       charCount: quote?.text.length,
     };
-    setIsComplete(true);
-    setCompleteStats(stats);
-    saveSession({ isComplete: true, completeStats: stats, mode: 'transcription' });
-    const newStreak = markComplete();
-    setStreak(newStreak);
+    markModeComplete(stats);
 
-    // 학습 기록 서버 저장 (실패해도 UX 차단 없음)
     postStudyLog({
       user_id: session?.user?.id ?? null,
       sentence_id: quote?.id ?? null,
@@ -158,12 +172,7 @@ export default function Home() {
   };
 
   const handleScrambleComplete = () => {
-    const stats: CompleteStats = { mode: 'scramble' };
-    setIsComplete(true);
-    setCompleteStats(stats);
-    saveSession({ isComplete: true, completeStats: stats, mode: 'scramble' });
-    const newStreak = markComplete();
-    setStreak(newStreak);
+    markModeComplete({ mode: 'scramble' });
 
     postStudyLog({
       user_id: session?.user?.id ?? null,
@@ -173,12 +182,7 @@ export default function Home() {
   };
 
   const handleClozeComplete = () => {
-    const stats: CompleteStats = { mode: 'cloze' };
-    setIsComplete(true);
-    setCompleteStats(stats);
-    saveSession({ isComplete: true, completeStats: stats, mode: 'cloze' });
-    const newStreak = markComplete();
-    setStreak(newStreak);
+    markModeComplete({ mode: 'cloze' });
 
     postStudyLog({
       user_id: session?.user?.id ?? null,
@@ -190,8 +194,13 @@ export default function Home() {
   const handleReset = () => {
     setIsComplete(false);
     setCompleteStats(null);
-    // 모드는 유지하면서 완료 상태만 초기화
-    saveSession({ isComplete: false, completeStats: null, mode });
+    // 현재 모드의 완료 기록도 제거 (다시 연습)
+    setModeCompleted(prev => {
+      const updated = { ...prev };
+      delete updated[mode];
+      saveSession({ isComplete: false, completeStats: null, mode, modeCompleted: updated });
+      return updated;
+    });
     setResetKey((k) => k + 1);
     const newCount = incrementRepeatCount();
     setRepeatCount(newCount);
@@ -199,15 +208,24 @@ export default function Home() {
 
   const switchMode = (newMode: Mode) => {
     if (newMode === mode) return;
-    // 완료 상태에서 모드 전환 시 자동 리셋
-    if (isComplete) {
+    // 전환할 모드가 이미 완료된 경우 완료 상태 복원
+    const savedStats = modeCompleted[newMode];
+    if (savedStats) {
+      setIsComplete(true);
+      setCompleteStats(savedStats);
+    } else {
       setIsComplete(false);
       setCompleteStats(null);
       setResetKey((k) => k + 1);
     }
     setMode(newMode);
     setUserChoseMode(true);
-    saveSession({ isComplete: false, completeStats: null, mode: newMode });
+    saveSession({
+      isComplete: !!savedStats,
+      completeStats: savedStats ?? null,
+      mode: newMode,
+      modeCompleted,
+    });
   };
 
   if (!quote) {

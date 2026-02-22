@@ -110,7 +110,7 @@ export async function fetchFeedback(
   return request<FeedbackResponse>('/feedback', {
     method: 'POST',
     body: JSON.stringify(payload),
-  });
+  }, 30000); // GPT 호출 + Render cold start 대비 30초 timeout
 }
 
 // ── 사용자 관련 ────────────────────────────────────────────────────

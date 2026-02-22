@@ -260,6 +260,7 @@ export function AIFeedback({ sentenceId, quoteText, autoFetch = false }: AIFeedb
           color: 'var(--ink-dim)',
           lineHeight: 1.85,
           whiteSpace: 'pre-line',
+          textAlign: 'left',
           minHeight: '5rem',
         }}
       >
