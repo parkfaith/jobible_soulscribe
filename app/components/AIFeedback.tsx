@@ -7,6 +7,7 @@ interface AIFeedbackProps {
   sentenceId: number;
   quoteText: string;
   autoFetch?: boolean; // 완료 시 자동으로 피드백 요청
+  userInput?: string;  // 사용자가 제출한 오답 (맞춤형 교정용)
 }
 
 type FeedbackTab = 'grammar' | 'nuance' | 'challenge';
@@ -20,7 +21,7 @@ const TAB_CONFIG: { key: FeedbackTab; label: string; icon: string }[] = [
 const FEEDBACK_SS_KEY = 'soulscribe-feedback';
 
 function saveFeedback(id: number, data: FeedbackResponse) {
-  try { sessionStorage.setItem(FEEDBACK_SS_KEY, JSON.stringify({ id, data })); } catch {}
+  try { sessionStorage.setItem(FEEDBACK_SS_KEY, JSON.stringify({ id, data })); } catch { }
 }
 
 function loadFeedback(id: number): FeedbackResponse | null {
@@ -32,7 +33,7 @@ function loadFeedback(id: number): FeedbackResponse | null {
   } catch { return null; }
 }
 
-export function AIFeedback({ sentenceId, quoteText, autoFetch = false }: AIFeedbackProps) {
+export function AIFeedback({ sentenceId, quoteText, autoFetch = false, userInput }: AIFeedbackProps) {
   const [state, setState] = useState<'idle' | 'loading' | 'done' | 'error'>('idle');
   const [feedback, setFeedback] = useState<FeedbackResponse | null>(null);
   const [activeTab, setActiveTab] = useState<FeedbackTab>('grammar');
@@ -40,7 +41,7 @@ export function AIFeedback({ sentenceId, quoteText, autoFetch = false }: AIFeedb
   const doFetch = async () => {
     setState('loading');
     try {
-      const data = await fetchFeedback({ sentence_id: sentenceId, text: quoteText });
+      const data = await fetchFeedback({ sentence_id: sentenceId, text: quoteText, user_input: userInput });
       setFeedback(data);
       saveFeedback(sentenceId, data);
       setState('done');
@@ -58,7 +59,7 @@ export function AIFeedback({ sentenceId, quoteText, autoFetch = false }: AIFeedb
     } else if (autoFetch) {
       doFetch();
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sentenceId]);
 
   // ── 초기 상태: 버튼 ──────────────────────────────────────────────
@@ -197,6 +198,25 @@ export function AIFeedback({ sentenceId, quoteText, autoFetch = false }: AIFeedb
         overflow: 'hidden',
       }}
     >
+      {/* 1:1 맞춤 교정 (있는 경우에만 표시) */}
+      {feedback?.custom_correction && (
+        <div
+          style={{
+            padding: '1rem 1.2rem',
+            borderBottom: '1px solid rgba(201,168,76,0.1)',
+            background: 'rgba(201,168,76,0.05)',
+            textAlign: 'left',
+          }}
+        >
+          <div style={{ color: 'var(--gold)', fontSize: '0.85rem', marginBottom: '0.6rem', fontWeight: 'bold' }}>
+            💡 선생님의 1:1 맞춤 교정
+          </div>
+          <div style={{ fontSize: '0.88rem', color: 'var(--ink)', lineHeight: 1.6, whiteSpace: 'pre-line' }}>
+            {ensureLineBreaks(feedback.custom_correction)}
+          </div>
+        </div>
+      )}
+
       {/* 헤더 */}
       <div
         style={{

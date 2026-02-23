@@ -93,6 +93,7 @@ export async function checkHealth(): Promise<{ status: string }> {
 export interface FeedbackPayload {
   sentence_id: number;
   text: string;
+  user_input?: string;
 }
 
 export interface FeedbackResponse {
@@ -100,6 +101,7 @@ export interface FeedbackResponse {
   grammar_analysis: string;
   nuance_insights: string;
   practice_challenge: string;
+  custom_correction?: string | null;
   cached: boolean;
 }
 

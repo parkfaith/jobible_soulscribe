@@ -51,5 +51,11 @@ backend/venv/
 backend/soulscribe_local.db
 backend/data/*.json
 
+# 로그 및 임시 파일
+*.log
+eslint.json
+eslint_output*.txt
+eslint_quiet.txt
+
 # claude code
 .claude/

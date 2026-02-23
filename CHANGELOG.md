@@ -6,6 +6,45 @@ joBiBle SoulScribe 변경 이력
 
 ---
 
+## [2026-02-23] - iPad Apple Pencil 삭제 UX 개선
+
+### 추가 (Added)
+- **Transcription 모드 삭제 툴바**: textarea 위에 `← 한 글자` / `⟲ 전체 지우기` 2개 버튼 추가
+  - iPad Apple Pencil(Scribble) 필기 시 키보드 없이도 텍스트 삭제 가능
+  - 입력 중일 때만 표시 (완료/미입력 시 숨김)
+  - 기존 디자인 시스템(gold-dim, wrong 색상) 일관 유지
+
+### 수정 파일 목록
+- `app/components/TranscriptionEngine.tsx` — 삭제 툴바 추가
+
+---
+
+## [2026-02-23] - 코드 품질 개선 및 리팩토링
+
+### 리팩토링 (Refactored)
+- **공통 단어 집합 추출**: ScrambleMode와 ClozeMode에서 중복 정의된 전치사/관사/접속사/대명사 등을 `lib/wordSets.ts`로 통합
+- **chunkSentence() 함수 분리**: ScrambleMode 내 70줄 인라인 함수를 `lib/chunkSentence.ts`로 분리 (테스트/재사용 용이)
+- **따옴표 엣지 케이스 수정**: chunkSentence에서 여는 따옴표가 구두점으로 인식되어 chunk가 잘리는 문제 해결 (닫는 구두점만 매칭하도록 변경)
+
+### 수정 (Fixed)
+- **feedback.py import 정리**: `from typing import Optional`이 클래스 정의 사이에 위치 → 파일 상단 import로 이동
+- **GPT 타임아웃 미설정**: OpenAI 클라이언트에 `timeout=25` 추가 (Render free tier 30초 제한 대비)
+- **globals.css EOF 개행 누락**: 파일 끝 개행 복원
+
+### 기타 (Chore)
+- `.gitignore` — `*.log`, `eslint_output*.txt` 등 임시 파일 패턴 추가
+
+### 수정 파일 목록
+- `lib/wordSets.ts` *(신규)* — 공통 단어 집합
+- `lib/chunkSentence.ts` *(신규)* — 의미 단위 분리 함수
+- `app/components/ScrambleMode.tsx` — 인라인 함수/상수 제거, lib import로 전환
+- `app/components/ClozeMode.tsx` — 인라인 TARGET_VOCAB 제거, lib import로 전환
+- `backend/routers/feedback.py` — import 정리 + OpenAI 타임아웃 추가
+- `app/globals.css` — EOF 개행 복원
+- `.gitignore` — 임시 파일 패턴 추가
+
+---
+
 ## [2026-02-22] - UI/UX 개선 및 정확도 계산 수정
 
 ### 수정 (Fixed)

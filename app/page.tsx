@@ -22,6 +22,7 @@ interface CompleteStats {
   accuracy?: number;
   time?: number;
   charCount?: number;
+  userInput?: string;
 }
 
 // sessionStorage 키
@@ -36,7 +37,7 @@ interface SessionState {
 }
 
 function saveSession(state: SessionState) {
-  try { sessionStorage.setItem(SS_KEY, JSON.stringify(state)); } catch {}
+  try { sessionStorage.setItem(SS_KEY, JSON.stringify(state)); } catch { }
 }
 
 function loadSession(): SessionState | null {
@@ -136,7 +137,7 @@ export default function Home() {
         google_id: session.user.id,
         email: session.user.email ?? '',
         name: session.user.name ?? undefined,
-      }).catch(() => {/* 실패해도 무시 */});
+      }).catch(() => {/* 실패해도 무시 */ });
     }
   }, [session?.user?.id]);
 
@@ -153,12 +154,13 @@ export default function Home() {
     setStreak(newStreak);
   };
 
-  const handleTranscriptionComplete = (accuracy: number, time: number) => {
+  const handleTranscriptionComplete = (accuracy: number, time: number, userInput?: string) => {
     const stats: CompleteStats = {
       mode: 'transcription',
       accuracy,
       time,
       charCount: quote?.text.length,
+      userInput,
     };
     markModeComplete(stats);
 
@@ -168,7 +170,7 @@ export default function Home() {
       mode: 'transcription',
       accuracy,
       time_seconds: time,
-    }).catch(() => {});
+    }).catch(() => { });
   };
 
   const handleScrambleComplete = (accuracy: number) => {
@@ -179,7 +181,7 @@ export default function Home() {
       sentence_id: quote?.id ?? null,
       mode: 'scramble',
       accuracy,
-    }).catch(() => {});
+    }).catch(() => { });
   };
 
   const handleClozeComplete = (accuracy: number) => {
@@ -190,7 +192,7 @@ export default function Home() {
       sentence_id: quote?.id ?? null,
       mode: 'cloze',
       accuracy,
-    }).catch(() => {});
+    }).catch(() => { });
   };
 
   const handleReset = () => {
@@ -339,7 +341,7 @@ export default function Home() {
 
       {/* 메인 콘텐츠 */}
       <main
-        className="flex-1 flex flex-col items-center"
+        className="w-full flex flex-col items-center grow"
         style={{ padding: '3rem 1.5rem 4rem', gap: 0 }}
       >
         {/* 명언 카드 — Scramble/Cloze 모드에서는 원문 블러 처리 */}
@@ -357,9 +359,8 @@ export default function Home() {
           {/* 필사 모드 탭 */}
           <button
             onClick={() => switchMode('transcription')}
-            className={`flex-1 cursor-pointer uppercase transition-all ${
-              mode === 'transcription' ? '' : 'hover:bg-[rgba(255,255,255,0.03)]'
-            }`}
+            className={`flex-1 cursor-pointer uppercase transition-all ${mode === 'transcription' ? '' : 'hover:bg-[rgba(255,255,255,0.03)]'
+              }`}
             style={{
               padding: '0.6rem 0.5rem',
               background: mode === 'transcription' ? 'rgba(201,168,76,0.1)' : 'transparent',
@@ -381,9 +382,8 @@ export default function Home() {
           {/* 단어 스크램블 탭 */}
           <button
             onClick={() => switchMode('scramble')}
-            className={`flex-1 cursor-pointer uppercase transition-all ${
-              mode === 'scramble' ? '' : 'hover:bg-[rgba(255,255,255,0.03)]'
-            }`}
+            className={`flex-1 cursor-pointer uppercase transition-all ${mode === 'scramble' ? '' : 'hover:bg-[rgba(255,255,255,0.03)]'
+              }`}
             style={{
               padding: '0.6rem 0.5rem',
               background: mode === 'scramble' ? 'rgba(201,168,76,0.1)' : 'transparent',
@@ -405,9 +405,8 @@ export default function Home() {
           {/* 빈칸 채우기 탭 */}
           <button
             onClick={() => switchMode('cloze')}
-            className={`flex-1 cursor-pointer uppercase transition-all ${
-              mode === 'cloze' ? '' : 'hover:bg-[rgba(255,255,255,0.03)]'
-            }`}
+            className={`flex-1 cursor-pointer uppercase transition-all ${mode === 'cloze' ? '' : 'hover:bg-[rgba(255,255,255,0.03)]'
+              }`}
             style={{
               padding: '0.6rem 0.5rem',
               background: mode === 'cloze' ? 'rgba(201,168,76,0.1)' : 'transparent',
@@ -489,7 +488,7 @@ export default function Home() {
       </main>
 
       {/* 푸터 */}
-      <footer className="w-full flex justify-center">
+      <footer className="w-full flex justify-center mt-auto">
         <div
           className="max-w-170 md:max-w-215 w-full flex justify-between items-center"
           style={{

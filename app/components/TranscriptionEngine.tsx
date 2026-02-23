@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 
 interface TranscriptionEngineProps {
   originalText: string;
-  onComplete: (accuracy: number, time: number) => void;
+  onComplete: (accuracy: number, time: number, userInput?: string) => void;
   isComplete: boolean;
   fadeLevel?: 0 | 1 | 2 | 3;
 }
@@ -48,7 +48,7 @@ export default function TranscriptionEngine({
     // 완전 일치 시 자동 완료
     if (value === originalText && startTimeRef.current) {
       const elapsed = Math.round((Date.now() - startTimeRef.current) / 1000);
-      onComplete(acc || 100, elapsed);
+      onComplete(acc || 100, elapsed, value);
     }
   };
 
@@ -58,7 +58,7 @@ export default function TranscriptionEngine({
     const elapsed = startTimeRef.current
       ? Math.round((Date.now() - startTimeRef.current) / 1000)
       : 0;
-    onComplete(accuracy ?? 0, elapsed);
+    onComplete(accuracy ?? 0, elapsed, userInput);
   };
 
   const progress = Math.min(100, Math.round((userInput.length / originalText.length) * 100));
@@ -237,23 +237,61 @@ export default function TranscriptionEngine({
         }}
       />
 
-      {/* 제출 버튼 — 입력 시작 후 표시 */}
+      {/* 삭제 툴바 + 제출 버튼 — 입력 시작 후 표시 */}
       {userInput.length > 0 && !isComplete && (
-        <button
-          onClick={handleSubmit}
-          className="uppercase w-full cursor-pointer rounded-sm transition-all hover:bg-[rgba(201,168,76,0.1)]"
-          style={{
-            background: 'transparent',
-            border: '1px solid rgba(201,168,76,0.25)',
-            color: 'var(--gold-dim)',
-            padding: '0.6rem',
-            fontFamily: "'Crimson Pro', serif",
-            fontSize: '0.82rem',
-            letterSpacing: '0.14em',
-          }}
-        >
-          필사 완료 ↵
-        </button>
+        <>
+          {/* 삭제 버튼 행 */}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => handleInput(userInput.slice(0, -1))}
+              className="cursor-pointer rounded-sm transition-all hover:bg-[rgba(201,168,76,0.1)]"
+              style={{
+                background: 'rgba(201,168,76,0.05)',
+                border: '1px solid rgba(201,168,76,0.25)',
+                color: 'var(--gold)',
+                padding: '0.4rem 1rem',
+                fontFamily: "'Crimson Pro', serif",
+                fontSize: '0.78rem',
+                letterSpacing: '0.08em',
+              }}
+              title="한 글자 삭제"
+            >
+              &#x2190; 한 글자
+            </button>
+            <button
+              onClick={() => handleInput('')}
+              className="cursor-pointer rounded-sm transition-all hover:bg-[rgba(139,58,58,0.15)]"
+              style={{
+                background: 'rgba(139,58,58,0.05)',
+                border: '1px solid rgba(139,58,58,0.3)',
+                color: '#c06060',
+                padding: '0.4rem 1rem',
+                fontFamily: "'Crimson Pro', serif",
+                fontSize: '0.78rem',
+                letterSpacing: '0.08em',
+              }}
+              title="전체 지우기"
+            >
+              &#x27F2; 전체 지우기
+            </button>
+          </div>
+          {/* 제출 버튼 */}
+          <button
+            onClick={handleSubmit}
+            className="uppercase w-full cursor-pointer rounded-sm transition-all hover:bg-[rgba(201,168,76,0.1)]"
+            style={{
+              background: 'transparent',
+              border: '1px solid rgba(201,168,76,0.25)',
+              color: 'var(--gold-dim)',
+              padding: '0.6rem',
+              fontFamily: "'Crimson Pro', serif",
+              fontSize: '0.82rem',
+              letterSpacing: '0.14em',
+            }}
+          >
+            필사 완료 ↵
+          </button>
+        </>
       )}
     </div>
   );

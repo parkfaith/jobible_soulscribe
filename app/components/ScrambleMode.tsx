@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
+import { chunkSentence } from '@/lib/chunkSentence';
 
 interface ScrambleModeProps {
   originalText: string;
@@ -18,7 +19,7 @@ export default function ScrambleMode({
   onComplete,
   isComplete,
 }: ScrambleModeProps) {
-  const originalWords = useMemo(() => originalText.split(' '), [originalText]);
+  const originalWords = useMemo(() => chunkSentence(originalText), [originalText]);
 
   const [scrambledWords, setScrambledWords] = useState<string[]>([]);
   const [selected, setSelected] = useState<SelectedWord[]>([]);

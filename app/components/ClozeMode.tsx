@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
+import { TARGET_VOCAB } from '@/lib/wordSets';
 
 interface ClozeModeProps {
   originalText: string;
@@ -19,15 +20,43 @@ interface ClozeWord {
   isCorrect: boolean; // 정답 여부
 }
 
-// 빈칸으로 처리할 단어 선택 (짧은 단어 제외, 균등 분포)
+// 빈칸으로 처리할 단어 선택 (1순위: 타겟 어휘, 2순위: 4글자 이상)
 function selectClozeIndices(words: string[]): Set<number> {
-  const eligible = words
-    .map((w, i) => ({ w: w.replace(/[.,!?;:'"()]/g, ''), i }))
-    .filter(({ w }) => w.length >= 4); // 4글자 이상만 빈칸 대상
+  const cleanWords = words.map((w, i) => ({ w: w.replace(/[.,!?;:'"()]/g, '').toLowerCase(), i, originalLength: w.length }));
+  
+  const priorityEligible = cleanWords.filter(({ w }) => TARGET_VOCAB.has(w));
+  const fallbackEligible = cleanWords.filter(({ w }) => !TARGET_VOCAB.has(w) && w.length >= 4);
 
-  const count = Math.max(1, Math.round(eligible.length * CLOZE_RATIO));
-  const shuffled = [...eligible].sort(() => Math.random() - 0.5);
-  return new Set(shuffled.slice(0, count).map(({ i }) => i));
+  const targetCount = Math.max(1, Math.round(words.length * CLOZE_RATIO));
+  const selectedIndices = new Set<number>();
+  
+  // 우선 타겟 어휘들을 랜덤하게 선택
+  const shuffledPriority = [...priorityEligible].sort(() => Math.random() - 0.5);
+  for (const item of shuffledPriority) {
+    if (selectedIndices.size >= targetCount) break;
+    selectedIndices.add(item.i);
+  }
+  
+  // 부족하면 4글자 이상 단어들로 채움
+  if (selectedIndices.size < targetCount) {
+    const shuffledFallback = [...fallbackEligible].sort(() => Math.random() - 0.5);
+    for (const item of shuffledFallback) {
+      if (selectedIndices.size >= targetCount) break;
+      selectedIndices.add(item.i);
+    }
+  }
+
+  // 여전히 부족하면(단어가 아주 짧은 경우) 남은 것에서 무작위 선택
+  if (selectedIndices.size < targetCount) {
+    const remaining = cleanWords.filter(({ i, w }) => !selectedIndices.has(i) && w.length > 0);
+    const shuffledRemaining = [...remaining].sort(() => Math.random() - 0.5);
+    for (const item of shuffledRemaining) {
+      if (selectedIndices.size >= targetCount) break;
+      selectedIndices.add(item.i);
+    }
+  }
+
+  return selectedIndices;
 }
 
 export default function ClozeMode({
