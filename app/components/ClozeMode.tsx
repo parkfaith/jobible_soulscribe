@@ -22,7 +22,7 @@ interface ClozeWord {
 
 // 빈칸으로 처리할 단어 선택 (1순위: 타겟 어휘, 2순위: 4글자 이상)
 function selectClozeIndices(words: string[]): Set<number> {
-  const cleanWords = words.map((w, i) => ({ w: w.replace(/[.,!?;:'"()]/g, '').toLowerCase(), i, originalLength: w.length }));
+  const cleanWords = words.map((w, i) => ({ w: w.replace(/[.,!?;:'"()]/g, '').toLowerCase(), i }));
   
   const priorityEligible = cleanWords.filter(({ w }) => TARGET_VOCAB.has(w));
   const fallbackEligible = cleanWords.filter(({ w }) => !TARGET_VOCAB.has(w) && w.length >= 4);

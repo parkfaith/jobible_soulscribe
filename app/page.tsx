@@ -14,16 +14,7 @@ import CompleteOverlay from './components/CompleteOverlay';
 import { AuthButton } from './components/AuthButton';
 import { AIFeedback } from './components/AIFeedback';
 import InstallPrompt from './components/InstallPrompt';
-
-type Mode = 'transcription' | 'scramble' | 'cloze';
-
-interface CompleteStats {
-  mode: Mode;
-  accuracy?: number;
-  time?: number;
-  charCount?: number;
-  userInput?: string;
-}
+import type { Mode, CompleteStats } from '@/lib/types';
 
 // sessionStorage 키
 const SS_KEY = 'soulscribe-session';
@@ -46,7 +37,6 @@ function loadSession(): SessionState | null {
     return raw ? JSON.parse(raw) : null;
   } catch { return null; }
 }
-
 
 export default function Home() {
   const { data: session } = useSession();

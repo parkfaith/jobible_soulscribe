@@ -1,14 +1,7 @@
 'use client';
 
 import { AIFeedback } from './AIFeedback';
-
-interface CompleteStats {
-  mode: 'transcription' | 'scramble' | 'cloze';
-  accuracy?: number;
-  time?: number;
-  charCount?: number;
-  userInput?: string;
-}
+import type { CompleteStats } from '@/lib/types';
 
 interface CompleteOverlayProps {
   visible: boolean;

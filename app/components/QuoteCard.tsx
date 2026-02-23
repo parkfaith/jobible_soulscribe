@@ -55,7 +55,7 @@ export default function QuoteCard({ quote, hideText = false, fadeLevel = 0 }: Qu
     } finally {
       setIsSharing(false);
     }
-  }, [quote.source]);
+  }, [quote.source, isSharing]);
 
   const handleSpeak = useCallback(() => {
     if (!('speechSynthesis' in window)) return;
