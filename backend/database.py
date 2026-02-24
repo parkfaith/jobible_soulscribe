@@ -45,8 +45,7 @@ class _LocalConn:
         self._conn.close()
 
 
-def get_db():
-    """요청마다 DB 연결을 반환합니다 (FastAPI 의존성 주입용)."""
+def _create_connection():
     if _use_turso():
         import libsql  # type: ignore
         conn = libsql.connect(
@@ -58,10 +57,20 @@ def get_db():
     return conn
 
 
+def get_db():
+    """요청마다 DB 연결을 반환합니다 (FastAPI 의존성 주입용)."""
+    conn = _create_connection()
+    try:
+        yield conn
+        conn.commit()
+    finally:
+        conn.close()
+
+
 @contextmanager
 def db_context():
     """컨텍스트 매니저 방식의 DB 연결 (수동 사용 시)."""
-    conn = get_db()
+    conn = _create_connection()
     try:
         yield conn
         conn.commit()
@@ -78,7 +87,7 @@ def init_db() -> None:
     with open(schema_path, "r", encoding="utf-8") as f:
         sql = f.read()
 
-    conn = get_db()
+    conn = _create_connection()
     # 여러 SQL 문을 세미콜론으로 분리하여 순차 실행 (빈 문장만 제외, sqlite3가 주석 자체 처리)
     statements = [s.strip() for s in sql.split(";") if s.strip()]
     for stmt in statements:

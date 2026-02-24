@@ -4,7 +4,7 @@ Google OAuth 로그인 후 사용자 정보를 DB에 등록/조회합니다.
 """
 
 import logging
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
 from typing import Optional
 from database import get_db
@@ -21,11 +21,10 @@ class UserRegisterPayload(BaseModel):
 
 
 @router.post("/register")
-async def register_user(payload: UserRegisterPayload):
+async def register_user(payload: UserRegisterPayload, db = Depends(get_db)):
     """
     첫 로그인 시 사용자 등록. 이미 존재하면 무시 (idempotent).
     """
-    db = get_db()
     try:
         db.execute(
             "INSERT OR IGNORE INTO users (id, email, name) VALUES (?, ?, ?)",
@@ -37,31 +36,25 @@ async def register_user(payload: UserRegisterPayload):
     except Exception as e:
         logger.error(f"사용자 등록 실패: {e}")
         raise HTTPException(status_code=500, detail="사용자 등록 중 오류가 발생했습니다.")
-    finally:
-        db.close()
 
 
 @router.get("/{user_id}")
-async def get_user(user_id: str):
+async def get_user(user_id: str, db = Depends(get_db)):
     """
     사용자 프로필 조회.
     """
-    db = get_db()
-    try:
-        row = db.execute(
-            "SELECT id, email, name, streak, created_at FROM users WHERE id = ?",
-            [user_id],
-        ).fetchone()
+    row = db.execute(
+        "SELECT id, email, name, streak, created_at FROM users WHERE id = ?",
+        [user_id],
+    ).fetchone()
 
-        if not row:
-            raise HTTPException(status_code=404, detail="사용자를 찾을 수 없습니다.")
+    if not row:
+        raise HTTPException(status_code=404, detail="사용자를 찾을 수 없습니다.")
 
-        return {
-            "id": row[0],
-            "email": row[1],
-            "name": row[2],
-            "streak": row[3],
-            "created_at": row[4],
-        }
-    finally:
-        db.close()
+    return {
+        "id": row[0],
+        "email": row[1],
+        "name": row[2],
+        "streak": row[3],
+        "created_at": row[4],
+    }

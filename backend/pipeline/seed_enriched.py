@@ -11,7 +11,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
-from database import get_db, init_db
+from database import db_context, init_db
 
 DATA_DIR = Path(__file__).parent.parent / "data"
 INPUT_FILE = DATA_DIR / "enriched_quotes.json"
@@ -45,9 +45,7 @@ def main():
     print(f"{len(quotes)}개 명언 로드됨")
 
     init_db()
-    db = get_db()
-
-    try:
+    with db_context() as db:
         # 기존 데이터의 text를 가져와서 중복 방지
         existing_rows = db.execute("SELECT text FROM daily_sentences").fetchall()
         existing_texts = {row[0] for row in existing_rows}
@@ -89,9 +87,6 @@ def main():
         print(f"  중복 스킵: {skipped_dup}개")
         print(f"  검증 실패: {skipped_invalid}개")
         print(f"  DB 총 명언: {total}개")
-
-    finally:
-        db.close()
 
 
 if __name__ == "__main__":
