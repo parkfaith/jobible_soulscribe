@@ -6,6 +6,16 @@ joBiBle SoulScribe 변경 이력
 
 ---
 
+## [2026-02-24] - AI 피드백 1:1 맞춤 교정 자동화
+
+### 수정 (Fixed)
+- **1:1 맞춤 교정 무조건 갱신**: 사용자가 오답(100% 미만)을 제출한 경우, 항상 프론트엔드 캐시를 우회하여 백엔드(OpenAI)에서 새로운 1:1 교정 피드백을 받아오도록 수정 (#Try Again)
+
+### 수정 파일 목록
+- `app/components/AIFeedback.tsx`
+
+---
+
 ## [2026-02-23] - iPad Apple Pencil 삭제 UX 개선
 
 ### 추가 (Added)

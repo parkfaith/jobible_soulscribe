@@ -33,6 +33,10 @@ function saveFeedback(id: number, mode: string | undefined, userInput: string | 
 }
 
 function loadFeedback(id: number, mode?: string, userInput?: string): FeedbackResponse | null {
+  // 사용자가 제출한 오답이 있는 경우(100%가 아닌 경우) 매번 새로운 1:1 맞춤 교정을
+  // 받기 위해 로컬 캐시를 무시하고 항상 백엔드(OpenAI)로 요청합니다.
+  if (userInput) return null;
+
   try {
     const key = getCacheKey(id, mode, userInput);
     const raw = sessionStorage.getItem(`${FEEDBACK_SS_KEY}-${key}`);
