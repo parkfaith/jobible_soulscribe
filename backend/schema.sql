@@ -58,3 +58,9 @@ CREATE TABLE IF NOT EXISTS review_schedules (
     UNIQUE (user_id, sentence_id),
     FOREIGN KEY (sentence_id) REFERENCES daily_sentences(id)
 );
+
+-- 방문자 테이블
+CREATE TABLE IF NOT EXISTS visitors (
+    date TEXT PRIMARY KEY,
+    count INTEGER DEFAULT 0
+);

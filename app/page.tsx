@@ -14,6 +14,7 @@ import CompleteOverlay from './components/CompleteOverlay';
 import { AuthButton } from './components/AuthButton';
 import { AIFeedback } from './components/AIFeedback';
 import InstallPrompt from './components/InstallPrompt';
+import VisitorCounter from './components/VisitorCounter';
 import type { Mode, CompleteStats } from '@/lib/types';
 
 // sessionStorage 키
@@ -494,7 +495,10 @@ export default function Home() {
             letterSpacing: '0.08em',
           }}
         >
-          <span>&copy; 2026 joBiBle SoulScribe</span>
+          <div className="flex flex-col gap-1">
+            <span>&copy; 2026 joBiBle SoulScribe</span>
+            <VisitorCounter />
+          </div>
           <span>Made by JunHyoung Park</span>
         </div>
       </footer>
