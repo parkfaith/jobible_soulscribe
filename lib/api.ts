@@ -94,6 +94,7 @@ export interface FeedbackPayload {
   sentence_id: number;
   text: string;
   user_input?: string;
+  mode?: 'transcription' | 'scramble' | 'cloze';
 }
 
 export interface FeedbackResponse {

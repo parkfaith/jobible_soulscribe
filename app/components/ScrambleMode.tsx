@@ -5,7 +5,7 @@ import { chunkSentence } from '@/lib/chunkSentence';
 
 interface ScrambleModeProps {
   originalText: string;
-  onComplete: (accuracy: number) => void;
+  onComplete: (accuracy: number, userInput: string) => void;
   isComplete: boolean;
 }
 
@@ -42,7 +42,7 @@ export default function ScrambleMode({
     if (newSelected.length === scrambledWords.length) {
       const sentence = newSelected.map((s) => s.word).join(' ');
       if (sentence === originalText) {
-        onComplete(100);
+        onComplete(100, sentence);
       }
     }
   };
@@ -53,7 +53,8 @@ export default function ScrambleMode({
     const userWords = selected.map((s) => s.word);
     const correctCount = userWords.filter((w, i) => w === originalWords[i]).length;
     const accuracy = Math.round((correctCount / originalWords.length) * 100);
-    onComplete(accuracy);
+    const sentence = userWords.join(' ');
+    onComplete(accuracy, sentence);
   };
 
   const handleRemoveWord = (selIdx: number) => {

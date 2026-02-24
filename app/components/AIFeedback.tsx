@@ -8,6 +8,7 @@ interface AIFeedbackProps {
   quoteText: string;
   autoFetch?: boolean; // 완료 시 자동으로 피드백 요청
   userInput?: string;  // 사용자가 제출한 오답 (맞춤형 교정용)
+  mode?: 'transcription' | 'scramble' | 'cloze';
 }
 
 type FeedbackTab = 'grammar' | 'nuance' | 'challenge';
@@ -20,20 +21,27 @@ const TAB_CONFIG: { key: FeedbackTab; label: string; icon: string }[] = [
 
 const FEEDBACK_SS_KEY = 'soulscribe-feedback';
 
-function saveFeedback(id: number, data: FeedbackResponse) {
-  try { sessionStorage.setItem(FEEDBACK_SS_KEY, JSON.stringify({ id, data })); } catch { }
+function getCacheKey(id: number, mode?: string, userInput?: string) {
+  return `${id}-${mode || 'none'}-${userInput || 'none'}`;
 }
 
-function loadFeedback(id: number): FeedbackResponse | null {
+function saveFeedback(id: number, mode: string | undefined, userInput: string | undefined, data: FeedbackResponse) {
   try {
-    const raw = sessionStorage.getItem(FEEDBACK_SS_KEY);
+    const key = getCacheKey(id, mode, userInput);
+    sessionStorage.setItem(`${FEEDBACK_SS_KEY}-${key}`, JSON.stringify(data));
+  } catch { }
+}
+
+function loadFeedback(id: number, mode?: string, userInput?: string): FeedbackResponse | null {
+  try {
+    const key = getCacheKey(id, mode, userInput);
+    const raw = sessionStorage.getItem(`${FEEDBACK_SS_KEY}-${key}`);
     if (!raw) return null;
-    const parsed = JSON.parse(raw);
-    return parsed.id === id ? parsed.data : null;
+    return JSON.parse(raw);
   } catch { return null; }
 }
 
-export function AIFeedback({ sentenceId, quoteText, autoFetch = false, userInput }: AIFeedbackProps) {
+export function AIFeedback({ sentenceId, quoteText, autoFetch = false, userInput, mode }: AIFeedbackProps) {
   const [state, setState] = useState<'idle' | 'loading' | 'done' | 'error'>('idle');
   const [feedback, setFeedback] = useState<FeedbackResponse | null>(null);
   const [activeTab, setActiveTab] = useState<FeedbackTab>('grammar');
@@ -41,9 +49,9 @@ export function AIFeedback({ sentenceId, quoteText, autoFetch = false, userInput
   const doFetch = async () => {
     setState('loading');
     try {
-      const data = await fetchFeedback({ sentence_id: sentenceId, text: quoteText, user_input: userInput });
+      const data = await fetchFeedback({ sentence_id: sentenceId, text: quoteText, user_input: userInput, mode });
       setFeedback(data);
-      saveFeedback(sentenceId, data);
+      saveFeedback(sentenceId, mode, userInput, data);
       setState('done');
     } catch {
       setState('error');
@@ -52,7 +60,7 @@ export function AIFeedback({ sentenceId, quoteText, autoFetch = false, userInput
 
   // 마운트 시 sessionStorage에서 이전 피드백 복원 또는 자동 요청
   useEffect(() => {
-    const cached = loadFeedback(sentenceId);
+    const cached = loadFeedback(sentenceId, mode, userInput);
     if (cached) {
       setFeedback(cached);
       setState('done');
@@ -60,7 +68,7 @@ export function AIFeedback({ sentenceId, quoteText, autoFetch = false, userInput
       doFetch();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sentenceId]);
+  }, [sentenceId, mode, userInput]);
 
   // ── 초기 상태: 버튼 ──────────────────────────────────────────────
   if (state === 'idle') {

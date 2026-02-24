@@ -21,6 +21,7 @@ class FeedbackRequest(BaseModel):
     sentence_id: int   # 오늘의 명언 인덱스 (1-based, 캐시 키)
     text: str          # 원문 영어 문장
     user_input: Optional[str] = None # 사용자가 제출한 오답/입력 (선택)
+    mode: Optional[str] = None # 'transcription', 'scramble', 'cloze' 중 하나
 
 
 class FeedbackResponse(BaseModel):
@@ -103,11 +104,23 @@ async def get_feedback(payload: FeedbackRequest, db = Depends(get_db)):
 
         # 파트 2: 동적 맞춤 교정 생성
         if payload.user_input and payload.user_input.strip() != payload.text.strip():
+            mode_context = ""
+            if payload.mode == "transcription":
+                mode_context = "사용자가 문장을 필사(Transcription) 중에 다음과 같이 오타를 냈습니다:"
+            elif payload.mode == "scramble":
+                mode_context = "사용자가 뒤섞인 단어들을 조합(Scramble)하는 중에 단어 순서를 다음과 같이 틀렸습니다:"
+            elif payload.mode == "cloze":
+                mode_context = "사용자가 문장의 빈칸 채우기(Cloze) 중에 다음과 같이 잘못 입력했습니다:"
+            else:
+                mode_context = "원문은 다음과 같은데, 사용자는 다음과 같이 제출했습니다:"
+
             correction_prompt = (
                 f'당신은 친절한 영어 선생님입니다.\n'
-                f'원문은 "{payload.text}" 인데, 사용자는 다음과 같이 제출했습니다:\n"{payload.user_input}"\n\n'
-                f'사용자가 어떤 실수를 했는지(예: 시제, 관사, 스펠링 오타, 전치사 등) 분석해서 '
-                f'1~2문장의 간결한 한국어로 교정해주세요.'
+                f'원문:\n"{payload.text}"\n\n'
+                f'{mode_context}\n"{payload.user_input}"\n\n'
+                f'이전에 어떤 실수를 했는지와 상관없이, 방금 제출된 위 사용자 입력만을 보고 '
+                f'어떤 실수를 했는지(예: 시제, 관사, 스펠링 오타, 전치사, 어순 등) 분석해서 '
+                f'1~2문장의 간결한 한국어로 교정해주세요. 각 모드의 특성에 맞는 피드백을 주면 좋습니다.'
             )
             corr_response = client.chat.completions.create(
                 model="gpt-4o-mini",

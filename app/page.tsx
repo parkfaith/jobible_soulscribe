@@ -163,8 +163,8 @@ export default function Home() {
     }).catch(() => { });
   };
 
-  const handleScrambleComplete = (accuracy: number) => {
-    markModeComplete({ mode: 'scramble', accuracy });
+  const handleScrambleComplete = (accuracy: number, userInput: string) => {
+    markModeComplete({ mode: 'scramble', accuracy, userInput });
 
     postStudyLog({
       user_id: session?.user?.id ?? null,
@@ -174,8 +174,8 @@ export default function Home() {
     }).catch(() => { });
   };
 
-  const handleClozeComplete = (accuracy: number) => {
-    markModeComplete({ mode: 'cloze', accuracy });
+  const handleClozeComplete = (accuracy: number, userInput: string) => {
+    markModeComplete({ mode: 'cloze', accuracy, userInput });
 
     postStudyLog({
       user_id: session?.user?.id ?? null,
@@ -435,7 +435,12 @@ export default function Home() {
                 오늘의 학습을 이미 완료했습니다. 다시 연습할 수 있습니다.
               </span>
             </div>
-            <AIFeedback sentenceId={quote.id ?? 1} quoteText={quote.text} />
+            <AIFeedback
+              key={`${quote.id}-${mode}-${resetKey}`}
+              sentenceId={quote.id ?? 1}
+              quoteText={quote.text}
+              mode={mode}
+            />
           </div>
         )}
 

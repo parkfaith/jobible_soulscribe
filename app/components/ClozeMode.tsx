@@ -5,7 +5,7 @@ import { TARGET_VOCAB } from '@/lib/wordSets';
 
 interface ClozeModeProps {
   originalText: string;
-  onComplete: (accuracy: number) => void;
+  onComplete: (accuracy: number, userInput: string) => void;
   isComplete: boolean;
 }
 
@@ -23,20 +23,20 @@ interface ClozeWord {
 // 빈칸으로 처리할 단어 선택 (1순위: 타겟 어휘, 2순위: 4글자 이상)
 function selectClozeIndices(words: string[]): Set<number> {
   const cleanWords = words.map((w, i) => ({ w: w.replace(/[.,!?;:'"()]/g, '').toLowerCase(), i }));
-  
+
   const priorityEligible = cleanWords.filter(({ w }) => TARGET_VOCAB.has(w));
   const fallbackEligible = cleanWords.filter(({ w }) => !TARGET_VOCAB.has(w) && w.length >= 4);
 
   const targetCount = Math.max(1, Math.round(words.length * CLOZE_RATIO));
   const selectedIndices = new Set<number>();
-  
+
   // 우선 타겟 어휘들을 랜덤하게 선택
   const shuffledPriority = [...priorityEligible].sort(() => Math.random() - 0.5);
   for (const item of shuffledPriority) {
     if (selectedIndices.size >= targetCount) break;
     selectedIndices.add(item.i);
   }
-  
+
   // 부족하면 4글자 이상 단어들로 채움
   if (selectedIndices.size < targetCount) {
     const shuffledFallback = [...fallbackEligible].sort(() => Math.random() - 0.5);
@@ -99,14 +99,6 @@ export default function ClozeMode({
       };
     });
     setClozeWords(updated);
-
-    // 모든 빈칸을 맞췄으면 자동 완료 (정확도 100%)
-    const allCorrect = updated
-      .filter(cw => cw.isCloze)
-      .every(cw => cw.isCorrect);
-    if (allCorrect) {
-      onComplete(100);
-    }
   };
 
   // 완료된 빈칸 수로 진행률 계산
@@ -178,15 +170,14 @@ export default function ClozeMode({
                 style={{
                   width: `${inputWidth}ch`,
                   background: 'transparent',
-                  borderBottom: `2px solid ${
-                    cw.userInput === ''
+                  borderBottom: `2px solid ${cw.userInput === ''
                       ? focusIdx === i
                         ? 'var(--gold)'
                         : 'var(--gold-dim)'
                       : cw.isCorrect
-                      ? 'var(--correct)'
-                      : 'var(--wrong)'
-                  }`,
+                        ? 'var(--correct)'
+                        : 'var(--wrong)'
+                    }`,
                   borderTop: 'none',
                   borderLeft: 'none',
                   borderRight: 'none',
@@ -241,7 +232,8 @@ export default function ClozeMode({
             const accuracy = clozeItems.length > 0
               ? Math.round((correctCount / clozeItems.length) * 100)
               : 0;
-            onComplete(accuracy);
+            const sentence = clozeWords.map(cw => cw.isCloze ? cw.userInput : cw.word).join(' ');
+            onComplete(accuracy, sentence);
           }}
           className="uppercase w-full cursor-pointer rounded-sm transition-all hover:bg-[rgba(201,168,76,0.1)]"
           style={{

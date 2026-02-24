@@ -44,7 +44,12 @@ export default function CompleteOverlay({
           color: 'var(--gold)',
         }}
       >
-        Well done, Soul.
+        {(() => {
+          if (stats.accuracy && stats.accuracy >= 100) return 'Perfect harmony, Soul.';
+          if (stats.accuracy && stats.accuracy >= 80) return 'Well done, Soul.';
+          if (stats.accuracy && stats.accuracy >= 50) return 'Good effort, Soul.';
+          return 'Keep practicing, Soul.';
+        })()}
       </div>
 
       {/* Message */}
@@ -60,15 +65,19 @@ export default function CompleteOverlay({
           <>
             정확도 {stats.accuracy}%로 {stats.time}초 만에 완성했습니다.
             <br />
-            오늘의 문장이 당신의 손끝에 새겨졌습니다.
+            {stats.accuracy && stats.accuracy >= 80
+              ? '오늘의 문장이 당신의 손끝에 새겨졌습니다.'
+              : '꾸준한 필사가 당신을 더 강하게 만들 것입니다.'}
           </>
         ) : (
           <>
             정확도 {stats.accuracy ?? 0}%로 완성했습니다.
             <br />
-            {isCloze
-              ? '핵심 단어들이 당신의 기억 속에 새겨졌습니다.'
-              : '문장의 흐름이 당신의 것이 되었습니다.'}
+            {stats.accuracy && stats.accuracy >= 80
+              ? (isCloze
+                ? '핵심 단어들이 당신의 기억 속에 깊이 새겨졌습니다.'
+                : '문장의 흐름이 온전히 당신의 것이 되었습니다.')
+              : '실수를 통해 문장의 구조를 더 선명하게 배울 수 있습니다.'}
           </>
         )}
       </p>
@@ -194,7 +203,14 @@ export default function CompleteOverlay({
         className="w-full"
         style={{ borderTop: '1px solid rgba(201,168,76,0.1)', paddingTop: '0.5rem' }}
       >
-        <AIFeedback sentenceId={sentenceId} quoteText={quoteText} autoFetch userInput={stats.userInput} />
+        <AIFeedback
+          key={`${sentenceId}-${stats.mode}-${stats.userInput || ''}`}
+          sentenceId={sentenceId}
+          quoteText={quoteText}
+          autoFetch
+          userInput={stats.userInput}
+          mode={stats.mode}
+        />
       </div>
     </div>
   );
