@@ -5,8 +5,7 @@
 
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
-from datetime import datetime
-import pytz
+from datetime import datetime, timezone, timedelta
 from database import get_db
 
 router = APIRouter(prefix="/visitors", tags=["visitors"])
@@ -21,9 +20,9 @@ def increment_visitor_count(conn = Depends(get_db)):
     KST 기준으로 오늘 날짜의 방문자 수를 1 증가시키고,
     오늘 방문자 수와 총 누적 방문자 수를 반환합니다.
     """
-    # 한국 시간 기준 오늘 날짜 구하기 (KST)
-    tz_kst = pytz.timezone('Asia/Seoul')
-    today_str = datetime.now(tz_kst).strftime('%Y-%m-%d')
+    # 한국 시간 기준 오늘 날짜 구하기 (KST = UTC+9)
+    kst = timezone(timedelta(hours=9))
+    today_str = datetime.now(kst).strftime('%Y-%m-%d')
     
     # 1. 오늘 날짜 레코드가 없으면 생성 (INSERT OR IGNORE와 유사한 효과)
     # SQLite의 UPSERT (ON CONFLICT) 활용
