@@ -103,9 +103,8 @@ export default function Home() {
       return; // 복원 시 resize 기반 모드 자동 전환 불필요
     }
 
-    // 화면 크기에 따른 기본 모드 설정 (768px 기준)
-    const isMobile = window.innerWidth < 768;
-    setMode(isMobile ? 'scramble' : 'transcription');
+    // 기본 모드: transcription (화면 크기 무관)
+    setMode('transcription');
 
     // resize 시 사용자가 수동 선택하지 않은 경우에만 모드 자동 전환
     const handleResize = () => {
@@ -131,6 +130,50 @@ export default function Home() {
       }).catch(() => {/* 실패해도 무시 */ });
     }
   }, [session?.user?.id]);
+
+  // 날짜 변경 감지 → 자동 리로드 (새 콘텐츠 로드)
+  useEffect(() => {
+    const getToday = () => new Date().toDateString();
+    const loadDate = getToday();
+
+    const reloadIfDateChanged = () => {
+      if (getToday() !== loadDate) {
+        sessionStorage.removeItem(SS_KEY);
+        window.location.reload();
+      }
+    };
+
+    // 1) 자정 타이머 — 앱을 보고 있는 중 자정이 지나는 경우
+    const now = new Date();
+    const midnight = new Date(now);
+    midnight.setDate(midnight.getDate() + 1);
+    midnight.setHours(0, 0, 0, 0);
+    const msUntilMidnight = midnight.getTime() - now.getTime() + 1000; // 1초 여유
+    const midnightTimer = setTimeout(reloadIfDateChanged, msUntilMidnight);
+
+    // 2) 탭/앱 전환 복귀 시 날짜 확인 (백그라운드 → 포그라운드)
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        reloadIfDateChanged();
+      }
+    };
+
+    // 3) bfcache 복원 시 날짜 확인 (모바일 Safari 등)
+    const handlePageShow = (e: PageTransitionEvent) => {
+      if (e.persisted) {
+        reloadIfDateChanged();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('pageshow', handlePageShow);
+
+    return () => {
+      clearTimeout(midnightTimer);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('pageshow', handlePageShow);
+    };
+  }, []);
 
   // 모드 완료 시 공통 처리
   const markModeComplete = (stats: CompleteStats) => {
