@@ -1,16 +1,19 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import { FALLBACK_QUOTE, Quote } from '@/lib/quotes';
 import { getStreak, markComplete, isCompletedToday } from '@/lib/streak';
 import { getTodayRepeatCount, incrementRepeatCount } from '@/lib/fading';
 import { fetchTodaySentence, postStudyLog, registerUser } from '@/lib/api';
+import { saveLocalStudy } from '@/lib/studyHistory';
 import QuoteCard from './components/QuoteCard';
 import TranscriptionEngine from './components/TranscriptionEngine';
 import ScrambleMode from './components/ScrambleMode';
 import ClozeMode from './components/ClozeMode';
 import CompleteOverlay from './components/CompleteOverlay';
+import StudyCalendar from './components/StudyCalendar';
+import MilestoneToast, { MILESTONE_DAYS } from './components/MilestoneToast';
 import { AuthButton } from './components/AuthButton';
 import { AIFeedback } from './components/AIFeedback';
 import InstallPrompt from './components/InstallPrompt';
@@ -52,6 +55,9 @@ export default function Home() {
   const [resetKey, setResetKey] = useState(0);
   const [completedToday, setCompletedToday] = useState(false);
   const [repeatCount, setRepeatCount] = useState(0);
+  const [milestoneReached, setMilestoneReached] = useState<number | null>(null);
+  const [calendarRefresh, setCalendarRefresh] = useState(0);
+  const handleMilestoneDismiss = useCallback(() => setMilestoneReached(null), []);
 
   useEffect(() => {
     // 클라이언트 초기화 — 백엔드 API에서 오늘의 명언 가져오기
@@ -186,6 +192,24 @@ export default function Home() {
     });
     const newStreak = markComplete();
     setStreak(newStreak);
+
+    // 로컬 학습 히스토리 저장 (캘린더용)
+    if (quote) {
+      saveLocalStudy({
+        date: new Date().toISOString().split('T')[0],
+        mode: stats.mode,
+        accuracy: stats.accuracy,
+        sentenceText: quote.text,
+        sentenceSource: quote.source || '',
+      });
+    }
+    // 캘린더 리프레시
+    setCalendarRefresh(c => c + 1);
+
+    // 마일스톤 체크
+    if (MILESTONE_DAYS.includes(newStreak)) {
+      setMilestoneReached(newStreak);
+    }
   };
 
   const handleTranscriptionComplete = (accuracy: number, time: number, userInput?: string) => {
@@ -276,6 +300,9 @@ export default function Home() {
 
   return (
     <div className="relative z-10 min-h-screen flex flex-col">
+      {/* 마일스톤 축하 토스트 */}
+      <MilestoneToast streak={milestoneReached} onDismiss={handleMilestoneDismiss} />
+
       {/* 헤더 */}
       <header
         className="flex items-center justify-between"
@@ -523,6 +550,17 @@ export default function Home() {
               isComplete={isComplete}
             />
           )}
+        </div>
+
+        {/* 학습 캘린더 — 학습 영역과 시각적 분리 */}
+        <div
+          className="max-w-170 md:max-w-215 w-full mt-16"
+          style={{
+            paddingTop: '1.5rem',
+            borderTop: '1px solid rgba(255,255,255,0.04)',
+          }}
+        >
+          <StudyCalendar refreshTrigger={calendarRefresh} />
         </div>
       </main>
 

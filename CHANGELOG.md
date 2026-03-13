@@ -6,6 +6,44 @@ joBiBle SoulScribe 변경 이력
 
 ---
 
+## [2026-03-13] - 학습 캘린더 + 동기부여 시스템
+
+### 추가 (Added)
+- **학습 캘린더**: 메인 페이지 하단에 월별 캘린더 표시
+  - 학습한 날짜에 골드 도트 마커 표시
+  - 날짜 클릭 시 해당일 학습한 문장, 모드, 정확도 확인
+  - 월 네비게이션 (이전/다음 월 이동, 미래 월 이동 불가)
+  - 월간 요약: 학습일수, 세션수, 진행률 바
+- **마일스톤 토스트**: 스트릭 7/14/30/50/100/365일 달성 시 축하 알림
+  - 상단 슬라이드 다운 → 4초 후 자동 사라짐
+  - 동일 마일스톤 중복 표시 방지 (localStorage)
+- **백엔드 캘린더 API**: `GET /calendar/{user_id}/{year}/{month}`
+  - study_logs JOIN daily_sentences → 날짜별 그룹핑 + 월간 요약 통계
+- **비로그인 학습 히스토리**: localStorage 기반 월별 학습 기록 저장/조회
+  - 3개월 이전 데이터 자동 정리 (용량 관리)
+- **통합 데이터 훅**: 로그인 → API, 비로그인 → localStorage 자동 전환 + 월별 캐싱
+
+### 개선 (Improved)
+- **완료 버튼 UI 강화**: 세 모드(필사/스크램블/빈칸)의 완료 버튼을 골드 그라데이션 배경 + 강조 테두리 + glow 효과로 변경하여 버튼 인지성 향상
+- **캘린더 월 이동 버튼**: 배경 + 테두리 추가하여 모바일에서도 잘 보이도록 개선
+- **캘린더 학습 내역**: 동일 문장은 한 번만 표시하고, 학습한 모드(필사/스크램블/빈칸) 뱃지를 정확도와 함께 나열
+
+### 수정 파일 목록
+- `backend/routers/calendar.py` *(신규)* — 월별 캘린더 API
+- `backend/main.py` — calendar 라우터 등록
+- `lib/studyHistory.ts` *(신규)* — 비로그인 localStorage 히스토리
+- `lib/useStudyHistory.ts` *(신규)* — 통합 데이터 훅
+- `lib/api.ts` — `CalendarResponse` 타입 + `fetchCalendar()` 함수 추가
+- `app/components/StudyCalendar.tsx` *(신규)* — 월별 학습 캘린더 컴포넌트
+- `app/components/MilestoneToast.tsx` *(신규)* — 마일스톤 달성 토스트
+- `app/components/TranscriptionEngine.tsx` — 완료 버튼 스타일 강화
+- `app/components/ScrambleMode.tsx` — 완료 버튼 스타일 강화
+- `app/components/ClozeMode.tsx` — 완료 버튼 스타일 강화
+- `app/page.tsx` — 캘린더/토스트 배치, 히스토리 저장, 마일스톤 체크
+- `app/globals.css` — slideDown, fadeOutUp 애니메이션 추가
+
+---
+
 ## [2026-02-24] - AI 피드백 1:1 맞춤 교정 자동화
 
 ### 수정 (Fixed)

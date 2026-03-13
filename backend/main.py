@@ -15,7 +15,7 @@ from fastapi.responses import JSONResponse
 
 from config import settings
 from database import init_db
-from routers import sentences, logs, users, feedback, visitors
+from routers import sentences, logs, users, feedback, visitors, calendar
 
 # ── 로깅 설정 ─────────────────────────────────────────────────────
 logging.basicConfig(
@@ -89,3 +89,4 @@ app.include_router(logs.router)
 app.include_router(users.router)
 app.include_router(feedback.router)
 app.include_router(visitors.router)
+app.include_router(calendar.router)

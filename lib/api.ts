@@ -138,6 +138,36 @@ export async function registerUser(
   });
 }
 
+// ── 캘린더 관련 ────────────────────────────────────────────────────
+
+export interface CalendarEntry {
+  mode: string;
+  accuracy: number | null;
+  time_seconds: number | null;
+  completed_at: string;
+  sentence_text: string | null;
+  sentence_source: string | null;
+}
+
+export interface CalendarResponse {
+  year: number;
+  month: number;
+  days: Record<string, CalendarEntry[]>;
+  summary: {
+    total_days: number;
+    total_sessions: number;
+  };
+}
+
+/** 월별 학습 캘린더 데이터를 가져옵니다. */
+export async function fetchCalendar(
+  userId: string,
+  year: number,
+  month: number,
+): Promise<CalendarResponse> {
+  return request<CalendarResponse>(`/calendar/${encodeURIComponent(userId)}/${year}/${month}`);
+}
+
 // ── 방문자 추적 관련 ────────────────────────────────────────────────
 
 export interface VisitorCountResponse {

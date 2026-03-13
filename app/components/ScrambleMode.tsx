@@ -186,15 +186,17 @@ export default function ScrambleMode({
       {selected.length > 0 && !isComplete && (
         <button
           onClick={handleSubmit}
-          className="uppercase w-full cursor-pointer rounded-sm transition-all hover:bg-[rgba(201,168,76,0.1)]"
+          className="uppercase w-full cursor-pointer rounded-sm transition-all hover:brightness-110 active:scale-[0.98]"
           style={{
-            background: 'transparent',
-            border: '1px solid rgba(201,168,76,0.25)',
-            color: 'var(--gold-dim)',
-            padding: '0.6rem',
+            background: 'linear-gradient(135deg, rgba(201,168,76,0.2) 0%, rgba(201,168,76,0.1) 100%)',
+            border: '1px solid rgba(201,168,76,0.4)',
+            color: 'var(--gold)',
+            padding: '0.75rem',
             fontFamily: "'Crimson Pro', serif",
-            fontSize: '0.82rem',
+            fontSize: '0.88rem',
+            fontWeight: 400,
             letterSpacing: '0.14em',
+            boxShadow: '0 0 12px rgba(201,168,76,0.08)',
           }}
         >
           배열 완료 ↵
